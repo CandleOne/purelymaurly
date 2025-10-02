@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Users Admin</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+:root { color-scheme: light dark; }
+body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; margin:0; background:#f5f7fb; color:#222; }
+header { padding:18px 22px; background:#111; color:#fff; display:flex; align-items:center; justify-content:space-between; }
+header h1 { margin:0; font-size:1.2rem; letter-spacing:.5px; }
+.container { max-width:1200px; margin:24px auto 60px; padding:0 18px; }
+.table-wrap { background:#fff; border-radius:20px; box-shadow:0 10px 30px -10px rgba(0,0,0,.15); overflow:auto; border:1px solid #e5e7eb; }
+.table-wrap::-webkit-scrollbar { height:10px; }
+.table-wrap::-webkit-scrollbar-thumb { background:#c7ced9; border-radius:20px; }
+table { width:100%; border-collapse:collapse; font-size:.9rem; }
+th, td { padding:10px 14px; text-align:left; white-space:nowrap; }
+th { position:sticky; top:0; background:#111; color:#fff; font-weight:600; font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; }
+tbody tr:nth-child(even){ background:#fafbfc; }
+tbody tr:hover { background:#f0f6ff; }
+.code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; font-size:.75rem; padding:2px 6px; border-radius:6px; background:#eef2f7; }
+.meta { font-size:.7rem; letter-spacing:.07em; font-weight:600; color:#4b5563; text-transform:uppercase; }
+.badge { display:inline-block; background:#111; color:#fff; font-size:.6rem; padding:4px 7px; border-radius:30px; letter-spacing:.05em; }
+.empty { padding:40px; text-align:center; color:#555; }
+.actions { display:flex; gap:8px; }
+.btn { border:0; background:#111; color:#fff; padding:6px 12px; font-size:.7rem; cursor:pointer; border-radius:8px; letter-spacing:.06em; font-weight:600; }
+.btn.light { background:#e5e7eb; color:#111; }
+.search-bar { margin:0 0 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.search-bar input { padding:10px 14px; border:1px solid #d1d5db; border-radius:10px; font:inherit; min-width:240px; }
+footer { text-align:center; font-size:.65rem; color:#666; margin:40px 0 20px; }
+@media (max-width: 700px){ th, td { padding:8px 10px; } header { flex-direction:column; gap:8px; align-items:flex-start; } }
+</style>
+</head>
+<body>
+<div class="layout" style="display:flex; min-height:100vh;">
+  <aside class="sidebar" style="width:240px; background:#111; color:#fff; display:flex; flex-direction:column;">
+    <h2 style="margin:18px 20px 10px; font-size:1rem; letter-spacing:.07em;">Admin</h2>
+    <nav>
+      <ul style="list-style:none; margin:0; padding:0;">
+        <li><a href="/" target="_blank" style="display:block; padding:12px 20px; color:#ccc; text-decoration:none; font-size:.85rem;">Storefront</a></li>
+        <li><a href="/admin/dashboard" style="display:block; padding:12px 20px; color:#ccc; text-decoration:none; font-size:.85rem;">Dashboard</a></li>
+  <li><a href="/admin/users" class="active" style="display:block; padding:12px 20px; background:#1f2937; color:#fff; text-decoration:none; font-size:.85rem;">Users DB</a></li>
+  <li><a href="/admin/coupons" style="display:block; padding:12px 20px; color:#ccc; text-decoration:none; font-size:.85rem;">Coupons</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <div style="flex:1; display:flex; flex-direction:column;">
+    <header>
+      <h1>Users Directory</h1>
+      <div class="meta">Total: {{ users|length }}</div>
+    </header>
+    <div class="container">
+  <div class="search-bar">
+    <input type="search" id="search" placeholder="Search name or email..." aria-label="Search users" />
+    <button class="btn" id="exportBtn">Export JSON</button>
+    <button class="btn light" id="refreshBtn">Refresh</button>
+  </div>
+  <div class="table-wrap" id="tableWrap">
+  {% if users %}
+    <table id="usersTable" aria-describedby="tableCaption">
+      <caption id="tableCaption" style="display:none;">User accounts list</caption>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>UUID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Created</th>
+          <th>Updated</th>
+          <th>Admin</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for u in users %}
+        <tr data-user-id="{{ u.id }}">
+          <td><span class="code">{{ u.id }}</span></td>
+          <td><span class="code">{{ u.uuid }}</span></td>
+          <td>{{ u.name }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.created_at }}</td>
+          <td>{{ u.updated_at }}</td>
+          <td><label style="display:flex;align-items:center;gap:6px;font-size:.65rem;letter-spacing:.05em;"><input type="checkbox" class="adm-toggle" {{ 'checked' if u.is_admin==1 else '' }} /> <span>{{ 'Yes' if u.is_admin==1 else 'No' }}</span></label></td>
+          <td class="actions"><button class="btn light del-btn" title="Delete user">Delete</button></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty">No users yet.</div>
+  {% endif %}
+  </div>
+    </div>
+    <footer>&copy; {{ 2025 }} Purely Maurly – internal view</footer>
+  </div>
+</div>
+<script>
+(function(){
+  const search = document.getElementById('search');
+  const table = document.getElementById('usersTable');
+  const exportBtn = document.getElementById('exportBtn');
+  const refreshBtn = document.getElementById('refreshBtn');
+  if(!table) return;
+  const rows = Array.from(table.querySelectorAll('tbody tr'));
+  // Delegate delete actions
+  table.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.del-btn');
+    if(!btn) return;
+    const tr = btn.closest('tr');
+    const id = tr.getAttribute('data-user-id');
+    if(!id) return;
+    if(!confirm('Delete user #' + id + '? This cannot be undone.')) return;
+    btn.disabled = true; btn.textContent = 'Deleting...';
+    try {
+      const res = await fetch('/api/admin/users/' + id, { method:'DELETE' });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || !data.ok){
+        alert('Failed: ' + (data.error || res.statusText));
+        btn.disabled = false; btn.textContent = 'Delete';
+        return;
+      }
+      tr.remove();
+    } catch(err){
+      alert('Network error deleting user');
+      btn.disabled = false; btn.textContent = 'Delete';
+    }
+  });
+  // Admin toggle (event delegation for checkbox changes)
+  table.addEventListener('change', async (e)=>{
+    const cb = e.target.closest('.adm-toggle');
+    if(!cb) return;
+    const tr = cb.closest('tr');
+    const id = tr.getAttribute('data-user-id');
+    const labelSpan = cb.parentElement.querySelector('span');
+    const desired = cb.checked;
+    labelSpan.textContent = desired ? 'Yes' : 'No';
+    cb.disabled = true;
+    try {
+      const res = await fetch('/api/admin/users/' + id + '/admin', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ is_admin: desired }) });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || !data.ok){
+        alert('Toggle failed: ' + (data.error || res.statusText));
+        cb.checked = !desired; labelSpan.textContent = cb.checked ? 'Yes' : 'No';
+      }
+    } catch(err){
+      alert('Network error');
+      cb.checked = !desired; labelSpan.textContent = cb.checked ? 'Yes' : 'No';
+    } finally {
+      cb.disabled = false;
+    }
+  });
+  function filter(){
+    const q = search.value.trim().toLowerCase();
+    rows.forEach(r=>{
+      const text = r.textContent.toLowerCase();
+      r.style.display = text.includes(q) ? '' : 'none';
+    });
+  }
+  search.addEventListener('input', filter);
+  exportBtn.addEventListener('click', ()=>{
+    const data = rows.filter(r=>r.style.display!=='none').map(r=>{
+      const cells = r.querySelectorAll('td');
+      return {
+        id: cells[0].innerText.trim(),
+        uuid: cells[1].innerText.trim(),
+        name: cells[2].innerText.trim(),
+        email: cells[3].innerText.trim(),
+        created_at: cells[4].innerText.trim(),
+        updated_at: cells[5].innerText.trim(),
+        is_admin: cells[6].querySelector('input')?.checked || false
+      };
+    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'users-export.json'; a.click();
+    URL.revokeObjectURL(url);
+  });
+  refreshBtn.addEventListener('click', ()=> location.reload());
+  // Responsive sidebar toggle (mirrors dashboard pattern)
+  const sb = document.querySelector('.sidebar');
+  const header = document.querySelector('header');
+  let toggleBtn = document.getElementById('sbToggle');
+  if(!toggleBtn){
+    toggleBtn = document.createElement('button');
+    toggleBtn.id='sbToggle'; toggleBtn.textContent='Menu';
+    toggleBtn.setAttribute('aria-label','Toggle menu');
+    Object.assign(toggleBtn.style,{position:'fixed',top:'14px',left:'14px',background:'#111',color:'#fff',border:'0',padding:'10px 14px',zIndex:'60',borderRadius:'12px',cursor:'pointer',display:'none'});
+    document.body.appendChild(toggleBtn);
+  }
+  function check(){ if(window.innerWidth < 900){ toggleBtn.style.display='block'; sb.classList.remove('open'); } else { toggleBtn.style.display='none'; sb.classList.add('open'); } }
+  window.addEventListener('resize', check); check();
+  toggleBtn.addEventListener('click', ()=> sb.classList.toggle('open'));
+})();
+</script>
+</body>
+</html>

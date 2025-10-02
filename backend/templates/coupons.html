@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Admin Coupons</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#0f172a;color:#f1f5f9;}
+header{padding:16px 22px;background:#1e293b;display:flex;align-items:center;gap:18px;}
+header a{color:#93c5fd;text-decoration:none;font-size:.8rem;}
+main{max-width:1100px;margin:30px auto 80px;padding:0 22px;}
+h1{margin:0 0 18px;font-size:1.4rem;letter-spacing:.04em;}
+form{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));background:#1e293b;padding:20px 22px;border-radius:18px;box-shadow:0 10px 34px -14px rgba(0,0,0,.55);}
+form label{font-size:.55rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8;display:flex;flex-direction:column;gap:6px;}
+input,select{background:#0f172a;border:1px solid #334155;color:#fff;border-radius:10px;padding:10px 12px;font:inherit;font-size:.75rem;}
+button{background:#6366f1;border:0;color:#fff;font-weight:600;padding:12px 18px;border-radius:14px;cursor:pointer;font:inherit;letter-spacing:.05em;box-shadow:0 8px 24px -10px rgba(0,0,0,.45);}
+button:hover{background:#818cf8;}
+.table-box{margin-top:38px;background:#1e293b;padding:0 0 8px;border-radius:20px;overflow:hidden;box-shadow:0 10px 34px -14px rgba(0,0,0,.55);}
+.table-box h2{margin:0;padding:16px 20px;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;background:#0f172a;}
+table{width:100%;border-collapse:collapse;font-size:.7rem;}
+th,td{padding:10px 12px;border-bottom:1px solid #334155;text-align:left;}
+th{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;}
+code{background:#0f172a;padding:3px 6px;border-radius:6px;font-size:.65rem;}
+.status-ok{color:#16a34a;font-weight:600;}
+.status-err{color:#dc2626;font-weight:600;}
+.msg{font-size:.65rem;min-height:18px;align-self:end;}
+@media (max-width:680px){form{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}}
+</style>
+</head>
+<body>
+<header>
+  <a href="/admin/dashboard">← Dashboard</a>
+  <h1 style="font-size:1rem;margin:0;">Coupon Assignment</h1>
+</header>
+<main>
+  <form id="couponForm">
+    <label>User (email or UUID)<input required name="user" placeholder="user@example.com"></label>
+    <label>Discount Type<select name="discount_type"><option value="percent">Percent</option><option value="fixed">Fixed</option></select></label>
+    <label>Value<input required name="value" type="number" min="1" step="0.01" placeholder="10"></label>
+    <label>Max Uses<input name="max_uses" type="number" min="1" value="1"></label>
+    <label>Expires At<input name="expires_at" type="datetime-local"></label>
+    <label>Custom Code<input name="code" placeholder="(auto)"></label>
+    <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:8px;">
+      <button type="submit">Create Coupon</button>
+      <span id="formMsg" class="msg"></span>
+    </div>
+  </form>
+  <div class="table-box">
+    <h2>Recent Coupons</h2>
+    <div style="padding:10px 16px;">
+      <form id="filterForm" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px;">
+        <input name="user" placeholder="Filter by user (email or UUID)" style="flex:1;min-width:240px;">
+        <button type="submit" style="background:#334155;padding:10px 14px;border-radius:10px;box-shadow:none;">Filter</button>
+        <button type="button" id="clearFilter" style="background:#334155;padding:10px 14px;border-radius:10px;box-shadow:none;">Clear</button>
+      </form>
+      <div style="overflow:auto;max-height:440px;">
+        <table id="couponTable">
+          <thead><tr><th>ID</th><th>Code</th><th>User Email</th><th>Type</th><th>Value</th><th>Uses</th><th>Max</th><th>Expires</th><th>Active</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+(async function(){
+  async function fetchCoupons(user){
+    const url = user? `/api/admin/coupons?user=${encodeURIComponent(user)}` : '/api/admin/coupons';
+    const r = await fetch(url); let d={}; try{d=await r.json();}catch{};
+    if(r.ok && d.ok){ renderRows(d.coupons||[]);} else { console.error('Load failed', d); }
+  }
+  function renderRows(list){
+    const tb=document.querySelector('#couponTable tbody'); tb.innerHTML='';
+    list.forEach(c=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${c.id}</td><td><code>${c.code}</code></td><td>${c.email||''}</td><td>${c.discount_type}</td><td>${c.value}</td><td>${c.uses}</td><td>${c.max_uses}</td><td>${c.expires_at||''}</td><td>${c.active? 'Yes':'No'}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+  const form=document.getElementById('couponForm');
+  const msg=document.getElementById('formMsg');
+  form.addEventListener('submit', async e=>{
+    e.preventDefault(); msg.textContent='Creating...'; msg.className='msg';
+    const fd=new FormData(form); const data=Object.fromEntries(fd.entries());
+    if(!data.user){ msg.textContent='User required'; return; }
+    try{
+      const r=await fetch('/api/admin/coupons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      let d={}; try{d=await r.json();}catch{}
+      if(r.ok && d.ok){ msg.textContent='Created '+d.code; msg.classList.add('status-ok'); form.reset(); fetchCoupons(); }
+      else { msg.textContent=d.error||'Error'; msg.classList.add('status-err'); }
+    }catch(err){ msg.textContent='Network error'; msg.classList.add('status-err'); }
+  });
+  document.getElementById('filterForm').addEventListener('submit', e=>{e.preventDefault(); const v=e.target.user.value.trim(); fetchCoupons(v||null);});
+  document.getElementById('clearFilter').addEventListener('click', ()=>{document.querySelector('#filterForm input[name="user"]').value=''; fetchCoupons();});
+  fetchCoupons();
+})();
+</script>
+</body>
+</html>
