@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Account • Purely Maurly</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root { --pm-accent:#ffb349; --pm-bg:#f7f7f7; --pm-border:rgba(0,0,0,.08); }
+    body{background:var(--pm-bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#222;}
+    .shell{max-width:1250px;margin:24px auto 90px;padding:0 20px;}
+    h1{font-size:clamp(1.9rem,3.5vw,2.6rem);margin:0 0 4px;}
+    .lead{margin:0 0 26px;color:#555;}
+    .layout{display:grid;grid-template-columns:260px 1fr;gap:34px;align-items:start;}
+    @media (max-width:1000px){.layout{grid-template-columns:1fr;}}
+    .side{display:flex;flex-direction:column;gap:18px;}
+    .card{background:#fff;border:1px solid var(--pm-border);border-radius:22px;padding:22px 22px 26px;box-shadow:0 10px 28px -8px rgba(0,0,0,.10);}
+    .avatar{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#ffb349,#ffd27a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.35rem;color:#3a2a00;margin-bottom:12px;box-shadow:0 8px 20px -6px rgba(0,0,0,.25);}
+    .email{font-size:.72rem;color:#555;margin:4px 0 14px;word-break:break-all;}
+    nav.account-nav{display:flex;flex-direction:column;gap:6px;}
+    nav.account-nav a{display:block;padding:11px 14px;border:1px solid var(--pm-border);background:#fafafa;border-radius:14px;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-decoration:none;color:#222;transition:.25s;}
+    nav.account-nav a.active,nav.account-nav a:hover{background:var(--pm-accent);color:#111;border-color:#ffce7a;}
+    .btn{background:var(--pm-accent);border:0;color:#111;font-weight:600;padding:10px 18px;border-radius:18px;font-size:.7rem;letter-spacing:.05em;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 6px 16px -6px rgba(0,0,0,.35);transition:.25s;}
+    .btn:hover{background:#ffc873;transform:translateY(-2px);} 
+    .btn.outline{background:#fff;border:1px solid var(--pm-border);box-shadow:none;}
+    .btn.outline:hover{background:#fff6e6;}
+    .btn.danger{background:#e53935;color:#fff;}
+    .btn.danger:hover{background:#c62828;}
+    .grid{display:grid;gap:28px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));}
+    .panel{background:#fff;border:1px solid var(--pm-border);border-radius:24px;padding:26px 26px 30px;display:flex;flex-direction:column;gap:18px;position:relative;box-shadow:0 10px 32px -10px rgba(0,0,0,.10);}
+    .panel h2{margin:0;font-size:.82rem;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:#222;}
+    .kv{display:flex;flex-direction:column;gap:8px;font-size:.72rem;}
+    .kv div{display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+    .kv label{font-weight:500;color:#333;}
+    .val{font-weight:600;color:#111;}
+    .inline-edit{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+    .inline-edit input{padding:10px 12px;border:1px solid #ccc;border-radius:14px;font:inherit;font-size:.7rem;}
+    .pref-group{display:flex;flex-direction:column;gap:12px;margin-top:4px;}
+    .pref-item{display:flex;align-items:center;gap:10px;font-size:.68rem;background:#fafafa;padding:10px 12px;border-radius:14px;border:1px solid #eee;}
+    .notice{background:#fff8e8;border:1px solid #ffe3b7;color:#6d4500;padding:12px 14px;border-radius:16px;font-size:.63rem;line-height:1.45;}
+    .activity{display:flex;flex-direction:column;gap:16px;}
+    .evt{display:flex;gap:10px;}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--pm-accent);margin-top:5px;box-shadow:0 0 0 3px #ffe2b7;}
+    .evt-body{font-size:.63rem;line-height:1.4;color:#444;}
+    .evt-body time{display:block;font-size:.55rem;letter-spacing:.05em;color:#777;margin-bottom:2px;}
+    footer{margin:70px 0 0;padding:40px 0;text-align:center;font-size:.7rem;color:#666;}
+    .skeleton{background:linear-gradient(90deg,#eee,#f9f9f9 50%,#eee);background-size:200% 100%;animation:shimmer 1.2s infinite;color:transparent;border-radius:6px;}
+    .skeleton.circle{border-radius:50%;}
+    @keyframes shimmer{0%{background-position:0 0}100%{background-position:-200% 0}}
+    .hidden{display:none!important;}
+    .fade{animation:fade .25s ease;}
+    @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+    <!-- Refactored Top Bar (no overlap, fully responsive) -->
+    <div class="top-bar" role="banner">
+        <div class="top-bar-inner">
+            <div class="top-bar-section top-left">
+                <img src="assets/location.png" alt="Locations" class="top-icon" width="28" height="28">
+                <a href="locations.html" class="top-link">Find our locations</a>
+            </div>
+            <div class="top-bar-section top-center" aria-live="polite">
+                <span id="topBarMessage" class="top-message">Free shipping on orders over $50!</span>
+                <a href="/shop.html" id="topBarCta" class="top-cta">Shop Now</a>
+            </div>
+            <div class="top-bar-section top-right">
+                <button id="ecoFriendlyBtn" class="eco-btn" aria-label="Eco friendly mission">
+                    <img src="assets/ecofriendly.png" alt="Eco Friendly" class="top-icon" width="30" height="30">
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function(){
+        const messages = [
+            'Free shipping on orders over $50!',
+            'Sign up for exclusive offers!',
+            'New arrivals every week!',
+            'Join our community for wellness tips!'
+        ];
+        const showCta = [true, true, true, true];
+        const msgEl = document.getElementById('topBarMessage');
+        const ctaEl = document.getElementById('topBarCta');
+        let idx = 0;
+        function rotate(){
+            msgEl.classList.add('fade-out');
+            ctaEl.classList.add('fade-out');
+            setTimeout(()=>{
+                idx = (idx + 1) % messages.length;
+                msgEl.textContent = messages[idx];
+                ctaEl.style.visibility = showCta[idx] ? 'visible' : 'hidden';
+                msgEl.classList.remove('fade-out');
+                ctaEl.classList.remove('fade-out');
+            },350);
+        }
+        setInterval(rotate, 3500);
+    })();
+    </script>
+    <!-- Cart Drawer -->
+    <div id="cartOverlay" class="cart-overlay" aria-hidden="true"></div>
+    <aside id="cartDrawer" class="cart-drawer" aria-hidden="true" aria-label="Shopping cart">
+        <div class="cart-drawer-header">
+            <h3>Your Cart <span id="cartCount" class="cart-badge" style="display:none;">0</span></h3>
+            <button id="closeCart" class="cart-close" aria-label="Close cart">×</button>
+        </div>
+        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-footer">
+            <div class="cart-sub">
+                <span>Subtotal</span><strong id="cartSubtotal">$0.00</strong>
+            </div>
+            <button class="checkout-btn" disabled>Checkout</button>
+            <p class="cart-note">Taxes and shipping calculated at checkout.</p>
+        </div>
+    </aside>
+    <script src="cart.js"></script>
+    <!-- Only dynamic content below will be replaced -->
+
+    <header class="main-header" role="navigation" aria-label="Primary">
+        <div class="header-inner">
+            <div class="header-left">
+                <button class="burger-menu" aria-label="Toggle menu" aria-expanded="false" aria-controls="site-menu">
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
+                </button>
+            </div>
+            <div class="header-center">
+                <a href="index.html" class="logo-link" aria-label="Purely Maurly Home">
+                    <img src="assets/headerfloer.png" alt="Purely Maurly Logo" class="header-logo">
+                </a>
+            </div>
+            <nav id="site-menu" class="header-nav" aria-hidden="true">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="shop.html">Shop</a>
+                <a class="nav-link" href="locations.html">Locations</a>
+                <a class="nav-link" href="/contact.html">Contact</a>
+            </nav>
+            <div class="header-right">
+                    <button id="accountBtn" class="account-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="authDialog" aria-label="Sign in or create account">
+                        <span class="account-icon" aria-hidden="true">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5Z"/>
+                                <path d="M3.5 22c1.6-4.1 5-6 8.5-6s6.9 1.9 8.5 6"/>
+                            </svg>
+                        </span>
+                        <span class="account-label">Login</span>
+                    </button>
+                <a href="#cart" class="cart-button" aria-label="View cart">
+                    <img src="assets/shopping-cart.png" alt="Cart">
+                    <span class="cart-count-badge" data-cart-count style="display:none;">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+    <script>
+    (function(){
+        const burger = document.querySelector('.burger-menu');
+        const menu = document.getElementById('site-menu');
+        if(!burger || !menu) return;
+        // Ensure closed by default on all breakpoints
+        menu.classList.remove('open');
+        menu.setAttribute('aria-hidden','true');
+        burger.setAttribute('aria-expanded','false');
+
+        const mqDesktop = window.matchMedia('(min-width:880px)');
+
+        function setOpen(open){
+            burger.classList.toggle('open', open);
+            menu.classList.toggle('open', open);
+            burger.setAttribute('aria-expanded', String(open));
+            menu.setAttribute('aria-hidden', String(!open));
+        }
+
+        burger.addEventListener('click', e=>{
+            e.stopPropagation();
+            setOpen(!burger.classList.contains('open'));
+        });
+        document.addEventListener('click', e=>{
+            if(!menu.contains(e.target) && !burger.contains(e.target)){
+                setOpen(false);
+            }
+        });
+        document.addEventListener('keydown', e=>{ if(e.key==='Escape') setOpen(false); });
+        menu.querySelectorAll('a.nav-link').forEach(l=> l.addEventListener('click',()=> setOpen(false)));
+
+        // Optional: if you later want nav auto-visible on desktop, you can add logic here.
+    })();
+    </script>
+  <main class="shell" id="app" aria-live="polite">
+    <h1>Account</h1>
+    <p class="lead">Manage your profile, preferences and security.</p>
+    <div class="layout">
+      <aside class="side">
+        <div class="card" id="profileSide">
+          <div class="avatar skeleton" id="avatar">&nbsp;</div>
+          <h3 id="sideName" class="skeleton" style="height:16px;width:130px;margin:0 0 2px;">&nbsp;</h3>
+          <div id="sideEmail" class="email skeleton" style="height:12px;width:180px;">&nbsp;</div>
+          <nav class="account-nav" id="nav">
+            <a href="#overview" data-panel="overview" class="active">Overview</a>
+            <a href="#profile settings" data-panel="profile">Profile Settings</a>
+            <a href="#preferences" data-panel="preferences">Preferences</a>
+            <a href="#security" data-panel="security">Security</a>
+            <a href="#activity" data-panel="activity">Activity</a>
+          </nav>
+          <a id="adminBtn" href="http://127.0.0.1:5000/admin/dashboard" class="btn outline hidden" style="margin-top:14px;text-decoration:none;">Admin Dashboard</a>
+          <button id="logoutSide" class="btn danger" style="margin-top:10px;">Logout</button>
+        </div>
+      </aside>
+      <div class="grid" id="panels">
+        <section class="panel fade" id="panel-overview">
+          <h2>Overview</h2>
+          <div class="kv">
+            <div><label>Account Name:</label> <span id="ovName" class="val skeleton" style="width:140px;">&nbsp;</span></div>
+            <div><label>Email:</label> <span id="ovEmail" class="val skeleton" style="width:220px;">&nbsp;</span></div>
+            <div><label>User UUID:</label> <span id="ovUuid" class="val skeleton" style="width:180px;">&nbsp;</span></div>
+            <div><label>Created:</label> <span id="ovCreated" class="val skeleton" style="width:120px;">&nbsp;</span></div>
+            <div><label>Role:</label> <span id="ovRole" class="val skeleton" style="width:80px;">&nbsp;</span></div>
+          </div>
+          <div style="margin-top:14px;">
+            <h3 style="margin:0 0 8px;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:#333;">Your Coupons</h3>
+            <div id="couponList" style="display:flex;flex-wrap:wrap;gap:10px;min-height:34px;">
+              <div class="skeleton" style="width:90px;height:34px;border-radius:10px;">&nbsp;</div>
+              <div class="skeleton" style="width:70px;height:34px;border-radius:10px;">&nbsp;</div>
+            </div>
+            <p id="couponEmpty" style="display:none;font-size:.6rem;color:#666;margin:8px 0 0;">No coupons yet.</p>
+          </div>
+        </section>
+        <section class="panel fade" id="panel-profile">
+          <h2>Profile Settings</h2>
+          <div class="kv" id="profileInfo">
+            <div><label>Name:</label> <span id="pfName" class="val"></span></div>
+            <div class="inline-edit" id="nameEdit" hidden>
+              <input type="text" id="nameInput" maxlength="80" aria-label="Name">
+              <button class="btn" id="saveName">Save</button>
+              <button class="btn outline" id="cancelName">Cancel</button>
+            </div>
+            <div><label>Email:</label> <span id="pfEmail" class="val"></span></div>
+            <div><label>User UUID:</label> <span id="pfUuid" class="val"></span></div>
+          </div>
+          <div>
+            <button class="btn" id="editNameBtn">Edit Name</button>
+          </div>
+          <div class="notice">Name changes are local-only for now (demo). Hook up a PATCH /future endpoint to persist.</div>
+        </section>
+        <section class="panel fade" id="panel-preferences">
+          <h2>Preferences</h2>
+          <p style="margin:0;font-size:.63rem;color:#666;">Saved on the server (when possible) & locally for instant UI.</p>
+          <div class="pref-group">
+            <label class="pref-item"><input type="checkbox" id="prefMarketing"> <span>Marketing Emails</span></label>
+            <label class="pref-item"><input type="checkbox" id="prefDark"> <span>Dark Theme</span></label>
+          </div>
+          <div class="inline-edit">
+            <button class="btn" id="savePrefs">Save Preferences</button>
+            <span id="prefsMsg" style="font-size:.63rem;font-weight:600;color:#555;margin-left:4px;align-self:center;"></span>
+          </div>
+          <div class="notice">Marketing opt-in & theme stored via /api/account/preferences (and localStorage for theme toggle).</div>
+        </section>
+        <section class="panel fade" id="panel-security">
+          <h2>Security</h2>
+          <p style="font-size:.65rem;color:#555;margin:0 0 12px;">Session based auth. Change your password below.</p>
+          <div class="notice" style="margin-bottom:14px;">After changing your password all existing sessions are revoked and you'll stay signed in with a fresh session.</div>
+          <form id="pwdForm" style="display:flex;flex-direction:column;gap:10px;max-width:360px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:.6rem;font-weight:600;letter-spacing:.08em;">Current Password
+                <input required type="password" id="pwdCurrent" autocomplete="current-password" style="margin-top:4px;padding:10px 12px;border:1px solid #ccc;border-radius:14px;font:inherit;font-size:.7rem;">
+              </label>
+              <label style="font-size:.6rem;font-weight:600;letter-spacing:.08em;">New Password
+                <input required minlength="6" type="password" id="pwdNew" autocomplete="new-password" style="margin-top:4px;padding:10px 12px;border:1px solid #ccc;border-radius:14px;font:inherit;font-size:.7rem;">
+              </label>
+              <label style="font-size:.6rem;font-weight:600;letter-spacing:.08em;">Confirm New Password
+                <input required minlength="6" type="password" id="pwdConfirm" autocomplete="new-password" style="margin-top:4px;padding:10px 12px;border:1px solid #ccc;border-radius:14px;font:inherit;font-size:.7rem;">
+              </label>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;">
+              <button type="submit" class="btn" id="pwdSave">Change Password</button>
+              <button type="button" class="btn outline" id="pwdClear">Clear</button>
+              <span id="pwdMsg" style="font-size:.6rem;font-weight:600;color:#555;min-width:120px;"></span>
+            </div>
+          </form>
+          <hr style="margin:20px 0;border:0;border-top:1px solid #eee;width:100%;">
+          <div class="notice" style="margin-bottom:10px;">Use Logout to terminate the current session immediately.</div>
+          <button class="btn danger" id="logoutSec">Logout</button>
+        </section>
+        <section class="panel fade" id="panel-activity">
+          <h2>Activity</h2>
+            <div id="activityFeed" class="activity">
+              <div class="evt"><span class="dot"></span><div class="evt-body"><time>—</time>Loading...</div></div>
+            </div>
+          <div class="notice">Sample events only. Connect to audit_log later.</div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer>© <span id="year"></span> Purely Maurly</footer>
+  <script>
+  const yearEl=document.getElementById('year');yearEl.textContent=new Date().getFullYear();
+  const panels=document.getElementById('panels');
+  const nav=document.getElementById('nav');
+  const state={ user:null, prefs:null };
+  // API base detection (mirrors auth.js) – ensures consistent origin use
+  const API_BASE=(function(){
+    if(location.port==='5000') return ''; // same-origin with Flask
+    if(window.PM_API_BASE) return window.PM_API_BASE; // manual override hook
+    return location.protocol+'//127.0.0.1:5000';
+  })();
+  async function api(path,opts={}){
+    let res, data, text;
+    try {
+      res = await fetch(API_BASE+path,{credentials:'include',headers:{'Content-Type':'application/json'},...opts});
+    } catch(e){
+      throw new Error('Network error: cannot reach backend at '+API_BASE+' (is Flask running?)');
+    }
+    try { text = await res.text(); data = text? JSON.parse(text):{}; } catch(parseErr){
+      console.warn('[account api] Non-JSON response', {status:res.status, snippet:(text||'').slice(0,180)});
+      throw new Error('Unexpected response (status '+res.status+').');
+    }
+    if(!res.ok || !data.ok){
+      throw new Error((data && (data.error||data.message)) || 'Request failed');
+    }
+    return data;
+  }
+  function $(id){return document.getElementById(id);} 
+  function setSkeletonOff(){['ovName','ovEmail','ovUuid','ovCreated','ovRole'].forEach(id=>$(id).classList.remove('skeleton'));['avatar','sideName','sideEmail'].forEach(id=>$(id).classList.remove('skeleton'))}
+  function formatDate(iso){if(!iso) return '—';try{return new Date(iso).toLocaleString();}catch{return iso;}}
+  function loadActivity(){const feed=$('activityFeed');const now=new Date();const fmt=o=>o.toISOString().split('T')[0]+' '+o.toTimeString().slice(0,5);const evts=[{t:new Date(now.getTime()-60*60*1000),m:'Session active'},{t:new Date(now.getTime()-2*60*60*1000),m:'Logged in'},{t:new Date(now.getTime()-26*60*60*1000),m:'Visited account page'}];feed.innerHTML='';evts.forEach(e=>{const div=document.createElement('div');div.className='evt';div.innerHTML='<span class="dot"></span><div class="evt-body"><time>'+fmt(e.t)+'</time>'+e.m+'</div>';feed.appendChild(div);});}
+  function applyUser(u){
+    state.user=u;setSkeletonOff();
+    const initials=(u.name||'?').split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase();
+    $('avatar').textContent=initials||'?';
+    ['sideName','ovName','pfName'].forEach(id=>$(id).textContent=u.name||'—');
+    ['sideEmail','ovEmail','pfEmail'].forEach(id=>$(id).textContent=u.email||'—');
+    ['ovUuid','pfUuid'].forEach(id=>$(id).textContent=u.uuid||'—');
+    $('ovCreated').textContent=formatDate(u.created_at);
+    $('ovRole').textContent=u.is_admin?'Admin':'User';
+    if(u.is_admin){ $('adminBtn').classList.remove('hidden'); }
+  const lt=$('logoutTop'); if(lt) lt.classList.remove('hidden');
+    loadActivity(); loadPrefs(); restoreTheme();
+  loadCoupons();
+  }
+  function restoreTheme(){const u=state.user;if(!u) return;const stored=JSON.parse(localStorage.getItem('pm_prefs_'+u.uuid)||'{}');document.body.classList.toggle('dark', !!stored.darkTheme);$('prefDark').checked=!!stored.darkTheme;}
+  async function loadPrefs(){try{const d=await api('/api/account/preferences');state.prefs=d.preferences||{};$('prefMarketing').checked=!!state.prefs.marketing_opt_in;}catch(e){console.warn('Prefs load failed',e);} }
+  async function savePrefs(){if(!state.user) return;const payload={ marketing_opt_in:$('prefMarketing').checked?1:0, theme:$('prefDark').checked?'dark':'light' }; try{await api('/api/account/preferences',{method:'PATCH',body:JSON.stringify(payload)}); const local={darkTheme:$('prefDark').checked, marketing_opt_in:$('prefMarketing').checked}; localStorage.setItem('pm_prefs_'+state.user.uuid, JSON.stringify(local)); $('prefsMsg').textContent='Saved'; setTimeout(()=>$('prefsMsg').textContent='',1400); document.body.classList.toggle('dark', local.darkTheme);}catch(e){$('prefsMsg').textContent='Error'; setTimeout(()=>$('prefsMsg').textContent='',1800);} }
+  async function logout(){try{await api('/api/auth/logout',{method:'POST'});}catch{} location='index.html';}
+  async function loadCoupons(){
+    const list=$('couponList'); if(!list) return; const empty=$('couponEmpty');
+    try{
+      const r=await fetch(API_BASE+'/api/account/coupons',{credentials:'include'}); let d={}; try{d=await r.json();}catch{}
+      list.innerHTML='';
+      if(!r.ok||!d.ok){ list.innerHTML='<span style="font-size:.6rem;color:#b3261e;">Error</span>'; return; }
+      const items=d.coupons||[];
+      if(!items.length){ empty.style.display='block'; return; }
+      empty.style.display='none';
+      items.forEach(c=>{
+        const tag=document.createElement('div');
+        const remaining=(c.max_uses - c.uses);
+        const isExpired = !!c.expires_at && (new Date(c.expires_at).getTime() < Date.now());
+        const inactive = c.active===0 || remaining<=0 || isExpired;
+        const exp=c.expires_at? new Date(c.expires_at).toLocaleDateString():'';
+        const status = inactive ? (isExpired? 'Expired':'Used') : 'Active';
+        // base style + inactive dim
+        tag.style.cssText='background:#111;color:#fff;padding:8px 10px;font-size:.6rem;letter-spacing:.05em;border-radius:10px;display:flex;flex-direction:column;min-width:86px;box-shadow:0 4px 14px -6px rgba(0,0,0,.35);'+(inactive? 'opacity:.55;filter:grayscale(0.1);':'' );
+        const valueTxt = (c.discount_type=='percent'? c.value+'%':'$'+c.value);
+        tag.innerHTML='<strong style="font-size:.65rem;display:flex;justify-content:space-between;gap:8px;"><span>'+c.code+'</span><span style="font-weight:600;font-size:.55rem;opacity:.9;">'+status+'</span></strong>'+
+                      '<span style="font-size:.55rem;opacity:.85;">'+valueTxt+' • '+Math.max(0,remaining)+'/'+c.max_uses+(exp? ' • '+exp:'')+'</span>';
+        list.appendChild(tag);
+      });
+    }catch(err){ list.innerHTML='<span style="font-size:.6rem;color:#b3261e;">Error</span>'; }
+  }
+  // Password change
+  async function changePassword(e){
+    e.preventDefault();
+    const cur=$('pwdCurrent').value.trim();
+    const nw=$('pwdNew').value.trim();
+    const cf=$('pwdConfirm').value.trim();
+    const msg=$('pwdMsg');
+    msg.style.color='#555'; msg.textContent='';
+    if(!cur||!nw||!cf){msg.textContent='Fill all fields';return;}
+    if(nw.length<6){msg.textContent='Min 6 chars';return;}
+    if(nw!==cf){msg.textContent='Mismatch';return;}
+    msg.textContent='Updating...';
+    try{
+      const res=await fetch(API_BASE+'/api/account/password',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_password:cur,new_password:nw})});
+      let data={}; try{data=await res.json();}catch{}
+      if(res.ok && data.ok){
+        msg.style.color='#1b6e1b'; msg.textContent='Changed';
+        $('pwdForm').reset();
+        setTimeout(()=>{msg.textContent='';},1800);
+      } else {
+        msg.style.color='#b3261e'; msg.textContent=(data&&data.error)||'Error';
+      }
+    }catch(err){ msg.style.color='#b3261e'; msg.textContent='Network error'; }
+  }
+  function clearPwd(){['pwdCurrent','pwdNew','pwdConfirm'].forEach(id=>$(id).value=''); $('pwdMsg').textContent='';}
+  function navHandler(e){const a=e.target.closest('a[data-panel]'); if(!a) return; e.preventDefault(); const id=a.dataset.panel; nav.querySelectorAll('a').forEach(l=>l.classList.toggle('active', l===a)); panels.querySelectorAll('.panel').forEach(p=>p.id==='panel-'+id? p.style.display='flex': p.style.display='none'); history.replaceState(null,'','#'+id);}
+  function applyHashPanel(){const h=location.hash.replace('#','')||'overview';const link=[...nav.querySelectorAll('a')].find(a=>a.dataset.panel===h);if(link){link.click();} else {nav.querySelector('a[data-panel="overview"]').click();}}
+  function enableNameEdit(){$('nameEdit').hidden=false;$('nameInput').value=state.user.name;$('editNameBtn').style.display='none';$('nameInput').focus();}
+  function cancelNameEdit(){$('nameEdit').hidden=true;$('editNameBtn').style.display='';}
+  function saveNameLocal(){const v=$('nameInput').value.trim(); if(!v) return; state.user.name=v; ['sideName','ovName','pfName'].forEach(id=>$(id).textContent=v); cancelNameEdit();}
+  async function init(){try{const d=await api('/api/auth/me');applyUser(d.user);applyHashPanel();}catch(e){document.getElementById('app').innerHTML='<div class="card" style="text-align:center"><h2 style="margin:0 0 8px;font-size:1.1rem;">Not Signed In</h2><p style="font-size:.8rem;margin:0 0 12px;">Please login to view your account.</p><a class="btn" href="index.html">Return Home</a></div>';}}
+  // Enhanced unauthenticated rendering with reason + quick login option
+  function showNotSigned(reason){
+    const safe = (reason||'Not signed in').slice(0,140);
+    document.getElementById('app').innerHTML = `
+      <div class="card" style="text-align:center;max-width:520px;margin:20px auto;">
+        <h2 style="margin:0 0 10px;font-size:1.15rem;">Not Signed In</h2>
+        <p style="font-size:.8rem;margin:0 0 14px;">${safe}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
+          <a class="btn" href="index.html" style="text-decoration:none;">Home</a>
+          <button class="btn outline" id="openLogin">Open Login</button>
+        </div>
+        <p style="margin-top:16px;font-size:.62rem;color:#666;">If you just created an account, refresh or ensure the backend is running on port 5000.</p>
+      </div>`;
+    const open = document.getElementById('openLogin');
+    if(open){
+      open.addEventListener('click',()=>{
+        // Navigate back to index with hash to trigger login UI (handled by auth.js there)
+        location='index.html#login';
+      });
+    }
+  }
+  async function init(){
+    try {
+      const d = await api('/api/auth/me');
+      applyUser(d.user);
+      applyHashPanel();
+    } catch(e){
+      console.warn('Auth check failed:', e);
+      showNotSigned(e?.message||'Session expired');
+    }
+  }
+  nav.addEventListener('click', navHandler);
+  window.addEventListener('hashchange', applyHashPanel);
+  $('editNameBtn').addEventListener('click', enableNameEdit);$('cancelName').addEventListener('click', cancelNameEdit);$('saveName').addEventListener('click', saveNameLocal);
+  $('savePrefs').addEventListener('click', savePrefs);
+  const pwdForm=document.getElementById('pwdForm'); if(pwdForm){pwdForm.addEventListener('submit', changePassword); $('pwdClear').addEventListener('click', clearPwd);}
+  $('prefDark').addEventListener('change',()=>{document.body.classList.toggle('dark', $('prefDark').checked);});
+  ['logoutSide','logoutTop','logoutSec'].forEach(id=>{ const el=$(id); if(el) el.addEventListener('click', logout); });
+  init();
+  // Inject auth modal so account page also supports opening login if logged out
+  </script>
+  <div id="authOverlay" class="auth-overlay" aria-hidden="true"></div>
+  <div id="authDialog" class="auth-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="authDialogTitle">
+    <div class="auth-modal-inner">
+      <button class="auth-close" id="authClose" aria-label="Close dialog">×</button>
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" role="tab" aria-selected="true" id="loginTab" data-target="loginPanel">Login</button>
+        <button class="auth-tab" role="tab" aria-selected="false" id="signupTab" data-target="signupPanel">Sign Up</button>
+      </div>
+      <div class="auth-panels">
+        <section id="loginPanel" class="auth-panel active" role="tabpanel" aria-labelledby="loginTab">
+          <h2 id="authDialogTitle" class="auth-title">Welcome Back</h2>
+          <form id="loginForm" class="auth-form" novalidate>
+            <label class="auth-field">Email
+              <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+            </label>
+            <label class="auth-field">Password
+              <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+            </label>
+            <button type="submit" class="auth-submit">Login</button>
+            <p class="auth-switch">No account? <button type="button" class="inline-switch" data-switch="signup">Sign up</button></p>
+          </form>
+        </section>
+        <section id="signupPanel" class="auth-panel" role="tabpanel" aria-labelledby="signupTab" hidden>
+          <h2 class="auth-title">Create Account</h2>
+          <form id="signupForm" class="auth-form" novalidate>
+            <label class="auth-field">Name
+              <input type="text" name="name" required minlength="2" placeholder="Your name">
+            </label>
+            <label class="auth-field">Email
+              <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+            </label>
+            <label class="auth-field">Password
+              <input type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Min 6 characters">
+            </label>
+            <label class="auth-field">Confirm Password
+              <input type="password" name="confirm" required minlength="6" autocomplete="new-password" placeholder="Repeat password">
+            </label>
+            <button type="submit" class="auth-submit">Sign Up</button>
+            <p class="auth-switch">Already have an account? <button type="button" class="inline-switch" data-switch="login">Login</button></p>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script src="auth.js"></script>
+</body>
+</html>
