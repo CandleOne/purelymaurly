@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purely Maurly Wellness</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Refactored Top Bar (no overlap, fully responsive) -->
+    <div class="top-bar" role="banner">
+        <div class="top-bar-inner">
+            <div class="top-bar-section top-left">
+                <img src="assets/location.png" alt="Locations" class="top-icon" width="28" height="28">
+                <a href="locations.html" class="top-link">Find our locations</a>
+            </div>
+            <div class="top-bar-section top-center" aria-live="polite">
+                <span id="topBarMessage" class="top-message">Free shipping on orders over $50!</span>
+                <a href="/shop.html" id="topBarCta" class="top-cta">Shop Now</a>
+            </div>
+            <div class="top-bar-section top-right">
+                <button id="ecoFriendlyBtn" class="eco-btn" aria-label="Eco friendly mission">
+                    <img src="assets/ecofriendly.png" alt="Eco Friendly" class="top-icon" width="30" height="30">
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function(){
+        const messages = [
+            'Free shipping on orders over $50!',
+            'Sign up for exclusive offers!',
+            'New arrivals every week!',
+            'Join our community for wellness tips!'
+        ];
+        const showCta = [true, true, true, true];
+        const msgEl = document.getElementById('topBarMessage');
+        const ctaEl = document.getElementById('topBarCta');
+        let idx = 0;
+        function rotate(){
+            msgEl.classList.add('fade-out');
+            ctaEl.classList.add('fade-out');
+            setTimeout(()=>{
+                idx = (idx + 1) % messages.length;
+                msgEl.textContent = messages[idx];
+                ctaEl.style.visibility = showCta[idx] ? 'visible' : 'hidden';
+                msgEl.classList.remove('fade-out');
+                ctaEl.classList.remove('fade-out');
+            },350);
+        }
+        setInterval(rotate, 3500);
+    })();
+    </script>
+    <!-- Cart Drawer -->
+    <div id="cartOverlay" class="cart-overlay" aria-hidden="true"></div>
+    <aside id="cartDrawer" class="cart-drawer" aria-hidden="true" aria-label="Shopping cart">
+        <div class="cart-drawer-header">
+            <h3>Your Cart <span id="cartCount" class="cart-badge" style="display:none;">0</span></h3>
+            <button id="closeCart" class="cart-close" aria-label="Close cart">×</button>
+        </div>
+        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-footer">
+            <div class="cart-sub">
+                <span>Subtotal</span><strong id="cartSubtotal">$0.00</strong>
+            </div>
+            <button class="checkout-btn" disabled>Checkout</button>
+            <p class="cart-note">Taxes and shipping calculated at checkout.</p>
+        </div>
+    </aside>
+    <script src="cart.js"></script>
+    <!-- Only dynamic content below will be replaced -->
+
+    <header class="main-header" role="navigation" aria-label="Primary">
+        <div class="header-inner">
+            <div class="header-left">
+                <button class="burger-menu" aria-label="Toggle menu" aria-expanded="false" aria-controls="site-menu">
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
+                </button>
+            </div>
+            <div class="header-center">
+                <a href="index.html" class="logo-link" aria-label="Purely Maurly Home">
+                    <img src="assets/headerfloer.png" alt="Purely Maurly Logo" class="header-logo">
+                </a>
+            </div>
+            <nav id="site-menu" class="header-nav" aria-hidden="true">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="shop.html">Shop</a>
+                <a class="nav-link" href="locations.html">Locations</a>
+                <a class="nav-link" href="contact.html">Contact</a>
+                <a class="nav-link" href="checkout.html">Checkout</a>
+            </nav>
+            <div class="header-right">
+                    <button id="accountBtn" class="account-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="authDialog" aria-label="Sign in or create account">
+                        <span class="account-icon" aria-hidden="true">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5Z"/>
+                                <path d="M3.5 22c1.6-4.1 5-6 8.5-6s6.9 1.9 8.5 6"/>
+                            </svg>
+                        </span>
+                        <span class="account-label">Login</span>
+                    </button>
+                <a href="#cart" class="cart-button" aria-label="View cart">
+                    <img src="assets/shopping-cart.png" alt="Cart">
+                    <span class="cart-count-badge" data-cart-count style="display:none;">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+    <script>
+    (function(){
+        const burger = document.querySelector('.burger-menu');
+        const menu = document.getElementById('site-menu');
+        if(!burger || !menu) return;
+        // Ensure closed by default on all breakpoints
+        menu.classList.remove('open');
+        menu.setAttribute('aria-hidden','true');
+        burger.setAttribute('aria-expanded','false');
+
+        const mqDesktop = window.matchMedia('(min-width:880px)');
+
+        function setOpen(open){
+            burger.classList.toggle('open', open);
+            menu.classList.toggle('open', open);
+            burger.setAttribute('aria-expanded', String(open));
+            menu.setAttribute('aria-hidden', String(!open));
+        }
+
+        burger.addEventListener('click', e=>{
+            e.stopPropagation();
+            setOpen(!burger.classList.contains('open'));
+        });
+        document.addEventListener('click', e=>{
+            if(!menu.contains(e.target) && !burger.contains(e.target)){
+                setOpen(false);
+            }
+        });
+        document.addEventListener('keydown', e=>{ if(e.key==='Escape') setOpen(false); });
+        menu.querySelectorAll('a.nav-link').forEach(l=> l.addEventListener('click',()=> setOpen(false)));
+
+        // Optional: if you later want nav auto-visible on desktop, you can add logic here.
+    })();
+    </script>
+    <script>
+    // Highlight active nav link (works for burger + desktop)
+    (function(){
+        const current = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        document.querySelectorAll('#site-menu a.nav-link').forEach(a=>{
+            const href = (a.getAttribute('href')||'').toLowerCase();
+            if(href === current){
+                a.classList.add('active');
+                a.setAttribute('aria-current','page');
+            } else {
+                a.classList.remove('active');
+                a.removeAttribute('aria-current');
+            }
+        });
+    })();
+    </script>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-content">
+
+            <div style="position:relative; width:100vw; height:60vh; left:50%; transform:translateX(-50%);">
+                <div class="hero-bg" aria-hidden="true">
+                <img src="assets/pexels-cristian-rojas-10040005.jpg"
+                    alt=""
+                    loading="lazy">
+                </div>
+                <style>
+                .hero-bg{
+                position:absolute;
+                inset:0;
+                overflow:hidden;
+                z-index:0;
+                pointer-events:none;
+                }
+                .hero-bg img{
+                width:100%;
+                height:100%;
+                object-fit:cover;
+                /* Keep a consistent strong blur at all viewport sizes */
+                filter:blur(4px) brightness(.78) saturate(.95);
+                transform:scale(1.15); /* hides blur edge */
+                will-change:transform, filter;
+                transition:none;
+                }
+                /* Removed media query that reduced blur on larger screens */
+                </style>
+                <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.60);"></div>
+            <!-- Enhanced hero overlay content -->
+            <div class="hero-overlay-content">
+                <img src="/assets/Naturallyyours.png" alt="Purely Maurly slogan" class="slogan-logo">
+                <p class="hero-title">Our Vision</p>
+                <p class="hero-tagline">Crafting mindful, earth‑friendly essentials that nurture body, mind, and space.</p>
+                <a href="shop.html" class="hero-btn">Explore Products</a>
+            </div>
+            <style>
+                .hero-overlay-content{
+                position:absolute; inset:0;
+                display:flex; flex-direction:column;
+                justify-content:center; align-items:center;
+                text-align:center; padding:1.5rem;
+                gap:1.1rem; color:#fff;
+                }
+                .hero-overlay-content .slogan-logo{
+                max-width:420px; width:70%; height:auto;
+                filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));
+                }
+                .hero-overlay-content .hero-title{
+                margin:0;
+                font-size:clamp(2.2rem,5vw,3.4rem);
+                letter-spacing:.05em;
+                text-transform:uppercase;
+                color:#ffffff;
+                text-shadow:0 2px 6px rgba(0,0,0,.55);
+                }
+                .hero-tagline{
+                margin:0;
+                max-width:750px;
+                font-size:clamp(.95rem,1.4vw,1.15rem);
+                line-height:1.45;
+                color:#f2f2f2;
+                }
+                .hero-btn{
+                display:inline-block;
+                background:#ffffff;
+                color:#111;
+                font-weight:600;
+                padding:.9rem 1.9rem;
+                border-radius:48px;
+                text-decoration:none;
+                font-size:clamp(.9rem,1.2vw,1rem);
+                letter-spacing:.6px;
+                box-shadow:0 6px 18px -4px rgba(0,0,0,.4);
+                transition:.35s;
+                }
+                .hero-btn:hover,
+                .hero-btn:focus{
+                background:#e9e9e9;
+                transform:translateY(-3px);
+                box-shadow:0 10px 26px -6px rgba(0,0,0,.5);
+                }
+                @media (max-width:650px){
+                .hero-overlay-content{padding:1rem; gap:.85rem;}
+                .hero-overlay-content .slogan-logo{width:82%;}
+                }
+                </style>
+                <br>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-illustration"></div>
+            </div>
+
+        </div>
+        <!-- Shop Cards Section -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">Soaps & Lotions</div>
+                    <div class="stat-label">Handmade, gentle, and aromatic</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">Candles</div>
+                    <div class="stat-label">Relax with our signature scents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">Clothes & Accessories</div>
+                    <div class="stat-label">Express your style, feel your best</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="platform-section">
+            
+        </section>
+
+        <!-- Featured Products Section -->
+        <section class="integrations-section">
+            <h2>Featured Collections</h2>
+            <p>Shop our most-loved products and discover your new favorites.</p>
+            <div class="integrations-grid">
+                <div class="integration-card">
+                    <div class="integration-icon bamboo"></div>
+                    <span>Glow Face Serum</span>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-icon slack"></div>
+                    <span>Lavender Soap</span>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-icon github"></div>
+                    <span>Vanilla Candle</span>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-icon jenkins"></div>
+                    <span>Organic Body Lotion</span>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-icon azure"></div>
+                    <span>Handmade Tote Bag</span>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-icon testcomplete"></div>
+                    <span>Rose Quartz Roller</span>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-icon docker"></div>
+                    <span>Essential Oil Blend</span>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-icon bitbucket"></div>
+                    <span>Cozy Scarf</span>
+                </div>
+            </div>
+            <button class="cta-btn">Shop All Products</button>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="cta-card">
+                <div class="cta-content">
+                    <h2>Join the Purely Maurly Community</h2>
+                    <p>Sign up for wellness tips, exclusive offers, and new product launches.</p>
+                    <button class="signup-btn">Sign Up</button>
+                </div>
+                <div class="cta-visual">
+                    <div class="testing-illustration"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Cards Section -->
+        <section class="blog-section">
+            <div class="blog-header">
+                <h2>Latest Wellness Tips</h2>
+            </div>
+            <div class="blog-grid">
+                <article class="blog-card">
+                    <div class="blog-tag">WELLNESS</div>
+                    <h3>5 Ways to Create a Calming Self-Care Routine</h3>
+                    <button class="learn-more">Read More</button>
+                </article>
+                <article class="blog-card">
+                    <div class="blog-tag">BEAUTY</div>
+                    <h3>Natural Ingredients for Glowing Skin</h3>
+                    <button class="learn-more">Read More</button>
+                </article>
+                <article class="blog-card">
+                    <div class="blog-tag">LIFESTYLE</div>
+                    <h3>How to Refresh Your Space with Scent</h3>
+                    <button class="learn-more">Read More</button>
+                </article>
+            </div>
+        </section>
+    </div>
+
+    <script>
+    let lastKnownModified = null;
+    async function checkForUpdate() {
+        try {
+            const res = await fetch('/last-modified');
+            const data = await res.json();
+            if (data.template && !window.location.pathname.includes(data.template.replace('.html', ''))) {
+                location.reload();
+            }
+            if (lastKnownModified === null) {
+                lastKnownModified = data.last_modified;
+            } else if (data.last_modified !== lastKnownModified) {
+                // Crossfade container for seamless update
+                const container = document.querySelector('.container');
+                container.style.transition = 'opacity 0.3s';
+                container.style.opacity = '0.3';
+                const containerRes = await fetch('/container-content');
+                const html = await containerRes.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContainer = doc.querySelector('.container');
+                setTimeout(() => {
+                    if (newContainer && container) {
+                        container.innerHTML = newContainer.innerHTML;
+                    } else {
+                        location.reload();
+                    }
+                    container.style.opacity = '1';
+                }, 150);
+                lastKnownModified = data.last_modified;
+            }
+        } catch (e) {}
+    }
+    setInterval(checkForUpdate, 10000);
+
+    // (Removed obsolete secondary burger toggle script to avoid errors; burger now closed by default.)
+    </script>
+    <!-- Auth Modal -->
+    <div id="authOverlay" class="auth-overlay" aria-hidden="true"></div>
+    <div id="authDialog" class="auth-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="authDialogTitle">
+        <div class="auth-modal-inner">
+            <button class="auth-close" id="authClose" aria-label="Close dialog">×</button>
+            <div class="auth-tabs" role="tablist">
+                <button class="auth-tab active" role="tab" aria-selected="true" id="loginTab" data-target="loginPanel">Login</button>
+                <button class="auth-tab" role="tab" aria-selected="false" id="signupTab" data-target="signupPanel">Sign Up</button>
+            </div>
+            <div class="auth-panels">
+                <section id="loginPanel" class="auth-panel active" role="tabpanel" aria-labelledby="loginTab">
+                    <h2 id="authDialogTitle" class="auth-title">Welcome Back</h2>
+                    <form id="loginForm" class="auth-form" novalidate>
+                        <label class="auth-field">Email
+                            <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+                        </label>
+                        <label class="auth-field">Password
+                            <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+                        </label>
+                        <button type="submit" class="auth-submit">Login</button>
+                        <p class="auth-switch">No account? <button type="button" class="inline-switch" data-switch="signup">Sign up</button></p>
+                    </form>
+                </section>
+                <section id="signupPanel" class="auth-panel" role="tabpanel" aria-labelledby="signupTab" hidden>
+                    <h2 class="auth-title">Create Account</h2>
+                    <form id="signupForm" class="auth-form" novalidate>
+                        <label class="auth-field">Name
+                            <input type="text" name="name" required minlength="2" placeholder="Your name">
+                        </label>
+                        <label class="auth-field">Email
+                            <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+                        </label>
+                        <label class="auth-field">Password
+                            <input type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Min 6 characters">
+                        </label>
+                        <label class="auth-field">Confirm Password
+                            <input type="password" name="confirm" required minlength="6" autocomplete="new-password" placeholder="Repeat password">
+                        </label>
+                        <button type="submit" class="auth-submit">Sign Up</button>
+                        <p class="auth-switch">Already have an account? <button type="button" class="inline-switch" data-switch="login">Login</button></p>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="auth.js"></script>
+</body>
+</html>

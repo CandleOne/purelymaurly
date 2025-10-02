@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Checkout • Purely Maurly</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f6f8;margin:0;color:#222;}
+.main{max-width:1080px;margin:110px auto 80px;padding:0 20px;display:grid;gap:34px;grid-template-columns:1fr 380px;align-items:start;}
+@media (max-width:1000px){.main{grid-template-columns:1fr;}}
+.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:24px;padding:24px 26px 30px;box-shadow:0 10px 30px -12px rgba(0,0,0,.12);}
+.hdr{display:flex;justify-content:space-between;align-items:center;margin:0 0 14px;}
+.hdr h1{font-size:1.4rem;margin:0;}
+.items{display:flex;flex-direction:column;gap:16px;margin:0 0 14px;}
+.item{display:flex;gap:14px;}
+.item img{width:72px;height:72px;object-fit:cover;border-radius:14px;background:#eee;}
+.item-info{flex:1;display:flex;flex-direction:column;gap:4px;font-size:.75rem;}
+.item-meta{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;color:#555;margin-top:4px;}
+.sum-row{display:flex;justify-content:space-between;font-size:.7rem;margin:4px 0;}
+.sum-row.total{font-size:.85rem;font-weight:700;padding-top:6px;border-top:1px solid #eee;margin-top:10px;}
+.badge{background:#111;color:#fff;padding:4px 8px;border-radius:999px;font-size:.55rem;letter-spacing:.05em;}
+.coupon-box{display:flex;gap:8px;margin:10px 0 16px;}
+.coupon-box input{flex:1;padding:10px 12px;border:1px solid #ccc;border-radius:12px;font:inherit;font-size:.75rem;}
+.coupon-box button{background:#111;color:#fff;border:0;padding:10px 16px;border-radius:12px;cursor:pointer;font:inherit;font-size:.7rem;font-weight:600;}
+.pay-btn{width:100%;background:#2f7bff;color:#fff;border:0;padding:14px 20px;font:inherit;font-size:.9rem;font-weight:600;border-radius:16px;cursor:pointer;margin-top:12px;box-shadow:0 10px 28px -10px rgba(0,0,0,.35);}
+.pay-btn:disabled{opacity:.55;cursor:not-allowed;}
+.msg{font-size:.65rem;min-height:18px;margin-top:8px;font-weight:600;}
+</style>
+</head>
+<body>
+<header class="main-header" style="position:fixed;top:0;left:0;right:0;">
+  <div class="header-inner" style="justify-content:center;">
+    <a href="index.html" class="logo-link" aria-label="Purely Maurly Home" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#111;font-weight:600;">
+      <img src="assets/headerfloer.png" alt="Logo" style="height:46px;"> Checkout
+    </a>
+  </div>
+</header>
+<main class="main" id="checkoutApp">
+  <div class="card" id="cartCard">
+    <div class="hdr"><h1>Review</h1><span id="itemCount" class="badge">0 items</span></div>
+    <div id="items" class="items"></div>
+    <div class="coupon-box">
+      <input id="couponInput" placeholder="Coupon code" aria-label="Coupon code" />
+      <button id="applyCoupon">Apply</button>
+    </div>
+    <div id="couponMsg" class="msg"></div>
+  </div>
+  <div class="card" id="summaryCard">
+    <h2 style="margin:0 0 14px;font-size:1rem;">Summary</h2>
+    <div id="summary"></div>
+  <button id="payBtn" class="pay-btn" disabled>Pay Securely</button>
+    <div id="payMsg" class="msg"></div>
+  </div>
+</main>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+(function(){
+  const storageKey='pm_cart';
+  function loadCart(){try{return JSON.parse(localStorage.getItem(storageKey))||[]}catch{return[]}}
+  // Detect backend API base (mirrors logic in auth.js). If you're viewing this page
+  // via a static dev server (e.g. Live Server on another port), relative "/api/..."
+  // requests will hit THAT server (which doesn't have the Flask routes) -> 404.
+  // We fall back to 127.0.0.1:5000 where the Flask app normally runs.
+  const API_BASE = (function(){
+    if(location.port === '5000') return '';
+    if(window.PM_API_BASE) return window.PM_API_BASE; // allow manual override
+    return 'http://127.0.0.1:5000';
+  })();
+  const itemsEl=document.getElementById('items');
+  const summaryEl=document.getElementById('summary');
+  const countEl=document.getElementById('itemCount');
+  const couponInput=document.getElementById('couponInput');
+  const couponMsg=document.getElementById('couponMsg');
+  const payBtn=document.getElementById('payBtn');
+  const payMsg=document.getElementById('payMsg');
+  let coupon=null; let discount=0; let cart=loadCart();
+  function render(){
+    cart=loadCart();
+    itemsEl.innerHTML='';
+    if(!cart.length){itemsEl.innerHTML='<p style="font-size:.75rem;color:#555;">Your cart is empty.</p>';payBtn.disabled=true;return;}
+    cart.forEach(i=>{
+      const div=document.createElement('div');div.className='item';
+      div.innerHTML=`<img src="${i.image}" alt="${i.name}"><div class="item-info"><strong style="font-size:.8rem;">${i.name}</strong><div class="item-meta"><span>$${i.price.toFixed(2)} × ${i.qty}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div></div>`;
+      itemsEl.appendChild(div);
+    });
+    countEl.textContent=cart.length+ (cart.length===1?' item':' items');
+    const subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);
+    let discountAmt=0; if(coupon){ if(coupon.type==='percent') discountAmt=subtotal*(coupon.value/100); else discountAmt=Math.min(subtotal, coupon.value); }
+    const total=Math.max(0, subtotal-discountAmt);
+    summaryEl.innerHTML=`<div class='sum-row'><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`+
+      (coupon?`<div class='sum-row'><span>Discount (${coupon.code})</span><span>- $${discountAmt.toFixed(2)}</span></div>`:'')+
+      `<div class='sum-row total'><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
+    payBtn.disabled=false;
+  }
+  document.getElementById('applyCoupon').addEventListener('click',async()=>{
+    const code=couponInput.value.trim().toUpperCase(); if(!code){couponMsg.textContent='Enter a code';return;}
+    couponMsg.textContent='Validating...'; couponMsg.style.color='#555';
+    try {
+      const res = await fetch(API_BASE + '/api/checkout/validate-coupon',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({code,cart:cart.map(c=>({name:c.name,price:c.price,qty:c.qty}))})});
+      let data={}; try{data=await res.json();}catch{}
+      if(!res.ok || !data.ok){ couponMsg.textContent=(data && data.error)||'Invalid code'; couponMsg.style.color='#b3261e'; return; }
+      const srv=data.coupon; coupon={code:srv.code,type:srv.discount_type==='percent'?'percent':'fixed',value:parseFloat(srv.value)||0};
+      couponMsg.textContent='Coupon applied'; couponMsg.style.color='#1b6e1b'; render();
+    } catch(err){ couponMsg.textContent='Network error'; couponMsg.style.color='#b3261e'; }
+  });
+  let stripeInstance=null;
+  async function ensureStripe(){
+    if(stripeInstance) return stripeInstance;
+    try{
+      const cfgRes=await fetch(API_BASE + '/api/checkout/config');
+      let cfg={}; try{cfg=await cfgRes.json();}catch{}
+      if(cfgRes.ok && cfg.ok && cfg.enabled && cfg.publishable_key){
+        stripeInstance=Stripe(cfg.publishable_key);
+      }
+    }catch{}
+    return stripeInstance;
+  }
+  payBtn.addEventListener('click', async ()=>{
+    payBtn.disabled=true; payMsg.textContent='Creating session...'; payMsg.style.color='#555';
+    const payload={cart:cart.map(c=>({name:c.name,price:c.price,qty:c.qty})), coupon: coupon? coupon.code:null };
+    try {
+      const res = await fetch(API_BASE + '/api/checkout/session', {method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body: JSON.stringify(payload)});
+      let data={}; try { data = await res.json(); } catch(e) {}
+      if(!res.ok || !data.ok){
+        const msg=(data && data.error)||('Request failed ('+res.status+')');
+        payMsg.textContent=msg; payMsg.style.color='#b3261e'; payBtn.disabled=false; return;
+      }
+      if(data.simulated){
+        // Simulated: we already have final URL, just navigate
+        location = data.url; return;
+      }
+      const stripe = await ensureStripe();
+      if(stripe && data.id){
+        // Prefer redirectToCheckout for reliability; fallback to direct URL
+        const result = await stripe.redirectToCheckout({ sessionId: data.id });
+        if(result.error){
+          console.warn('[checkout] Stripe redirect error, falling back', result.error);
+          location = data.url; // fallback provided by backend
+        } else {
+          try { sessionStorage.setItem('pm_last_session_id', data.id); } catch {}
+        }
+      } else {
+        // If Stripe.js not available, fallback to session URL
+        location = data.url;
+      }
+    } catch (err){
+      console.error('[checkout] network error', err);
+      payMsg.textContent='Network error – ensure backend is running on same origin.'; payMsg.style.color='#b3261e'; payBtn.disabled=false;
+    }
+  });
+  render();
+  // If user lands back here (no session param) but we have a stored session id, offer button to view confirmation
+  (function resumeBanner(){
+    const params=new URLSearchParams(location.search);
+    if(params.get('session_id')) return; // already on confirmation elsewhere
+    let last=null; try{ last=sessionStorage.getItem('pm_last_session_id'); }catch{}
+    if(!last) return;
+    const bar=document.createElement('div');
+    bar.style.cssText='position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:12px 18px;border-radius:18px;font-size:.65rem;font-weight:600;z-index:5000;box-shadow:0 8px 30px -14px rgba(0,0,0,.5);';
+    bar.innerHTML='Return to your order confirmation? <button id="pmViewConf" style="margin-left:10px;background:#2563eb;color:#fff;border:0;padding:6px 10px;border-radius:10px;font:inherit;font-size:.6rem;cursor:pointer;font-weight:600;">View</button> <span id="pmDismiss" style="margin-left:8px;cursor:pointer;color:#f59e0b;">Dismiss</span>';
+    document.body.appendChild(bar);
+    bar.querySelector('#pmViewConf').onclick=()=>{location.href='order-confirmation.html?session_id='+encodeURIComponent(last);};
+    bar.querySelector('#pmDismiss').onclick=()=>{bar.remove();};
+  })();
+})();
+</script>
+</body>
+</html>

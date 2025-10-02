@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wellness Survey – Purely Maurly</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .survey-wrap{max-width:860px;margin:110px auto 60px;padding:0 16px}
+    .survey-card{background:#fff;border-radius:16px;box-shadow:0 14px 42px -18px rgba(0,0,0,.25);overflow:hidden}
+    .survey-head{padding:20px 22px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
+    .survey-title{margin:0;font-size:1.25rem;letter-spacing:.02em}
+    .survey-status{font-size:.85rem;color:#6b7280}
+    .survey-body{padding:22px}
+    .survey-label{display:block;margin-bottom:10px;font-weight:600;letter-spacing:.02em}
+    .survey-text{width:100%;min-height:220px;resize:vertical;padding:12px 14px;border:1px solid #d1d5db;border-radius:12px;font:inherit}
+    .survey-actions{display:flex;gap:10px;align-items:center;margin-top:16px}
+    .btn-primary{background:#111;color:#fff;border:0;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:600}
+    .btn-secondary{background:#e5e7eb;color:#111;border:0;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:600}
+    .msg{min-height:20px;font-size:.9rem;margin-top:10px}
+    .code-pill{display:inline-block;background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;padding:6px 10px;border-radius:999px;font-weight:700;letter-spacing:.03em}
+    .login-guard{background:#0f172a;color:#fff;padding:18px 20px;border-radius:12px;display:flex;justify-content:space-between;align-items:center}
+    .login-guard b{letter-spacing:.03em}
+  </style>
+</head>
+<body>
+  <!-- Top bar, header, and cart drawer are shared across pages -->
+  <header class="main-header" role="navigation" aria-label="Primary">
+    <div class="header-inner">
+      <div class="header-left">
+        <button class="burger-menu" aria-label="Toggle menu" aria-expanded="false" aria-controls="site-menu">
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+        </button>
+      </div>
+      <div class="header-center">
+        <a href="index.html" class="logo-link" aria-label="Purely Maurly Home">
+          <img src="assets/headerfloer.png" alt="Purely Maurly Logo" class="header-logo">
+        </a>
+      </div>
+      <nav id="site-menu" class="header-nav" aria-hidden="true">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="shop.html">Shop</a>
+        <a class="nav-link" href="locations.html">Locations</a>
+        <a class="nav-link" href="contact.html">Contact</a>
+  <a class="nav-link" href="checkout.html">Checkout</a>
+  <a class="nav-link active" href="survey.html" aria-current="page">Survey</a>
+      </nav>
+      <div class="header-right">
+        <button id="accountBtn" class="account-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="authDialog" aria-label="Sign in or create account">
+          <span class="account-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5Z"/>
+              <path d="M3.5 22c1.6-4.1 5-6 8.5-6s6.9 1.9 8.5 6"/>
+            </svg>
+          </span>
+          <span class="account-label">Login</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="survey-wrap">
+    <div class="survey-card">
+      <div class="survey-head">
+        <h1 class="survey-title">Wellness Reflection Survey</h1>
+        <div class="survey-status" id="surveyStatus">Please login to continue</div>
+      </div>
+      <div class="survey-body">
+        <div id="loginGuard" class="login-guard" role="alert">
+          <span><b>Login required</b> Jemison, Alabama 35085— sign in to complete this survey and receive a 10% off in store coupon for our product offerings!</span>
+          <button id="openLogin" class="btn-secondary">Login / Sign up</button>
+        </div>
+
+        <form id="surveyForm" style="display:none" autocomplete="on">
+          <label for="location" class="survey-label">Which location do you usually visit?</label>
+          <select id="location" name="location" class="survey-text">
+            <option value="" selected disabled>Select a location</option>
+            <option>Downtown</option>
+            <option>Midtown</option>
+            <option>Riverside</option>
+            <option>Online Only</option>
+            <option>Other</option>
+          </select>
+
+          <label for="rating" class="survey-label">On a scale of 1–10, how would you rate your experience with us?</label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input id="rating" name="rating" type="range" min="1" max="10" value="8" oninput="document.getElementById('ratingValue').textContent=this.value">
+            <span id="ratingValue" aria-live="polite">8</span>
+          </div>
+
+          <label for="wishlist" class="survey-label">What products or services do you wish we offered?</label>
+          <textarea id="wishlist" name="wishlist" class="survey-text" placeholder="Tell us what you'd like to see..." rows="3"></textarea>
+
+          <label for="essay" class="survey-label">In a few sentences, please share how our products have impacted your wellness journey:</label>
+          <textarea id="essay" name="essay" class="survey-text" placeholder="Your response here..." required></textarea>
+
+          <label for="email" class="survey-label">Email for coupon (optional — uses your account email by default)</label>
+          <input id="email" name="email" type="email" class="survey-text" placeholder="you@example.com" autocomplete="email">
+
+          <div class="survey-actions">
+            <button type="submit" class="btn-primary">Submit Survey</button>
+            <button type="button" id="loadMyCoupons" class="btn-secondary">Load My Coupons</button>
+          </div>
+          <div class="msg" id="msg"></div>
+        </form>
+
+        <div id="resultBox" style="display:none">
+          <p>Thank you! Your 10% coupon code is:</p>
+          <div id="couponCode" class="code-pill">—</div>
+          <p style="margin-top:10px;color:#374151">You can also find this in your account coupons.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Minimal auth modal markup to reuse existing auth.js (same as index.html) -->
+  <div id="authOverlay" class="auth-overlay" aria-hidden="true"></div>
+  <div id="authDialog" class="auth-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="authDialogTitle">
+    <div class="auth-modal-inner">
+      <button class="auth-close" id="authClose" aria-label="Close dialog">×</button>
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" role="tab" aria-selected="true" id="loginTab" data-target="loginPanel">Login</button>
+        <button class="auth-tab" role="tab" aria-selected="false" id="signupTab" data-target="signupPanel">Sign Up</button>
+      </div>
+      <div class="auth-panels">
+        <section id="loginPanel" class="auth-panel active" role="tabpanel" aria-labelledby="loginTab">
+          <h2 id="authDialogTitle" class="auth-title">Welcome Back</h2>
+          <form id="loginForm" class="auth-form" novalidate>
+            <label class="auth-field">Email
+              <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+            </label>
+            <label class="auth-field">Password
+              <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+            </label>
+            <button type="submit" class="auth-submit">Login</button>
+            <p class="auth-switch">No account? <button type="button" class="inline-switch" data-switch="signup">Sign up</button></p>
+          </form>
+        </section>
+        <section id="signupPanel" class="auth-panel" role="tabpanel" aria-labelledby="signupTab" hidden>
+          <h2 class="auth-title">Create Account</h2>
+          <form id="signupForm" class="auth-form" novalidate>
+            <label class="auth-field">Name
+              <input type="text" name="name" required minlength="2" placeholder="Your name">
+            </label>
+            <label class="auth-field">Email
+              <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+            </label>
+            <label class="auth-field">Password
+              <input type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Min 6 characters">
+            </label>
+            <label class="auth-field">Confirm Password
+              <input type="password" name="confirm" required minlength="6" autocomplete="new-password" placeholder="Repeat password">
+            </label>
+            <button type="submit" class="auth-submit">Sign Up</button>
+            <p class="auth-switch">Already have an account? <button type="button" class="inline-switch" data-switch="login">Login</button></p>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    // Require login before showing the survey form
+    (function(){
+      const guard = document.getElementById('loginGuard');
+      const form = document.getElementById('surveyForm');
+      const status = document.getElementById('surveyStatus');
+      const openLogin = document.getElementById('openLogin');
+      const msg = document.getElementById('msg');
+      const resultBox = document.getElementById('resultBox');
+      const couponCode = document.getElementById('couponCode');
+
+      function setLoggedInUI(u){
+        if(u){
+          guard.style.display = 'none';
+          form.style.display = '';
+          status.textContent = 'Logged in as ' + (u.name || u.email);
+        } else {
+          guard.style.display = '';
+          form.style.display = 'none';
+          status.textContent = 'Please login to continue';
+        }
+      }
+
+      // Initial state from auth.js
+      setLoggedInUI(window.PMAuth && window.PMAuth.getCurrent && window.PMAuth.getCurrent());
+      window.PMAuth && window.PMAuth.onChange(setLoggedInUI);
+
+      openLogin.addEventListener('click', ()=>{
+        window.PMAuth && window.PMAuth.open && window.PMAuth.open('login');
+      });
+
+      // Use same API base detection strategy as auth.js
+      const API_BASE = (function(){
+        if(location.port === '5000') return '';
+        if(window.PM_API_BASE) return window.PM_API_BASE;
+        return 'http://127.0.0.1:5000';
+      })();
+
+      async function api(path, opts={}){
+        const r = await fetch(API_BASE + path, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...(opts.headers||{}) },
+          ...opts
+        });
+        let data = {};
+        try{ data = await r.json(); }catch{}
+        if(!r.ok || !data.ok){ throw new Error(data.error || r.statusText || 'Request failed'); }
+        return data;
+      }
+
+      document.getElementById('surveyForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const essay = (document.getElementById('essay').value||'').trim();
+        msg.textContent = 'Submitting...'; msg.classList.remove('success');
+        try{
+          const d = await api('/api/survey/essay', { method:'POST', body: JSON.stringify({ essay }) });
+          const code = d.code;
+          couponCode.textContent = code;
+          resultBox.style.display = '';
+          msg.textContent = 'Success! Coupon added to your account.'; msg.classList.add('success');
+        }catch(err){
+          msg.textContent = err.message || 'Submit failed';
+        }
+      });
+
+      document.getElementById('loadMyCoupons').addEventListener('click', async ()=>{
+        msg.textContent = 'Loading your coupons...'; msg.classList.remove('success');
+        try{
+          const d = await api('/api/account/coupons');
+          if(d.coupons && d.coupons.length){
+            const c = d.coupons.find(c=> (c.discount_type==='percent' && Number(c.value)===10)) || d.coupons[0];
+            couponCode.textContent = c.code;
+            resultBox.style.display = '';
+            msg.textContent = 'Found active coupons in your account.'; msg.classList.add('success');
+          } else {
+            msg.textContent = 'No active coupons yet.';
+          }
+        }catch(err){
+          msg.textContent = err.message || 'Could not load coupons';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

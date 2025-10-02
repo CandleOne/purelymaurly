@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Contact Us • Purely Maurly Wellness</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+    /* Page specific (scoped) enhancements */
+    .contact-hero {margin-top:130px; padding:3.5rem 1.25rem 2.5rem; text-align:center; background:linear-gradient(135deg,#f5efe8,#ece7e1); position:relative; overflow:hidden;}
+    .contact-hero:before {content:""; position:absolute; inset:0; background:radial-gradient(circle at 70% 30%,rgba(170,140,100,.18),transparent 60%); pointer-events:none;}
+    .contact-hero h1 {margin:0 0 .75rem; font-size:clamp(2rem,5vw,3.1rem); letter-spacing:.04em; color:#2e261c;}
+    .contact-hero p {margin:0 auto; max-width:720px; font-size:clamp(.95rem,1.2vw,1.05rem); line-height:1.55; color:#4b433a;}
+
+    .contact-wrapper {max-width:1180px; margin:0 auto; padding:2.5rem 1.25rem 4rem; display:grid; gap:2.5rem; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); align-items:start;}
+
+    .contact-card, .contact-form-card {background:#fff; border:1px solid #e3ded7; border-radius:20px; padding:1.9rem 1.65rem 2rem; position:relative; box-shadow:0 4px 18px -6px rgba(0,0,0,.08);}
+    .contact-card h2, .contact-form-card h2 {margin:.15rem 0 1rem; font-size:1.35rem; letter-spacing:.5px; color:#2a241d;}
+
+    .contact-methods {display:grid; gap:1.1rem; margin:0; padding:0; list-style:none;}
+    .contact-method {display:flex; gap:.9rem; align-items:flex-start;}
+    .contact-method-icon {width:42px; height:42px; flex:0 0 42px; display:grid; place-items:center; background:#f1ece6; border-radius:14px; color:#5a4b38;}
+    .contact-method strong {display:block; font-size:.92rem; letter-spacing:.4px; color:#2b251d;}
+    .contact-method span {display:block; font-size:.8rem; line-height:1.3; color:#5a5247;}
+    .contact-method a {color:#4a3d2d; text-decoration:none; font-weight:600;}
+    .contact-method a:hover, .contact-method a:focus {text-decoration:underline;}
+
+    .contact-form-card form {display:grid; gap:1.1rem;}
+    .field {display:flex; flex-direction:column; gap:.45rem;}
+    .field label {font-size:.8rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:#4a4035;}
+    .field input, .field textarea, .field select {padding:.85rem .9rem; border:1px solid #d7d1c8; background:#fcfbfa; border-radius:12px; font:inherit; resize:vertical; min-height:52px;}
+    .field textarea {min-height:150px;}
+    .field input:focus, .field textarea:focus, .field select:focus {outline:2px solid #b89d7c; border-color:#b89d7c; background:#fff;}
+
+    .inline-two {display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));}
+
+    .submit-row {display:flex; flex-wrap:wrap; gap:.9rem; align-items:center; margin-top:.3rem;}
+    .btn-primary {background:#2f281f; color:#fff; border:none; padding:.95rem 1.6rem; font-weight:600; letter-spacing:.6px; border-radius:40px; cursor:pointer; font-size:.92rem; box-shadow:0 6px 18px -6px rgba(0,0,0,.35); transition:.3s;}
+    .btn-primary:hover, .btn-primary:focus {background:#44382a; transform:translateY(-2px);}
+
+    .form-note {font-size:.7rem; color:#6b6359; line-height:1.3;}
+
+    .map-card {grid-column:1 / -1; background:#fff; border:1px solid #e3ded7; border-radius:22px; padding:0; overflow:hidden; box-shadow:0 6px 20px -8px rgba(0,0,0,.1);}
+    .map-frame {width:100%; aspect-ratio:16/7; border:0; display:block; filter:grayscale(.15) brightness(.98) contrast(1.03);}    
+
+    @media (max-width:760px){
+    .contact-hero {margin-top:108px; padding:3rem 1.1rem 2rem;}
+    .contact-wrapper {padding:2.2rem 1.1rem 3.4rem; gap:2rem;}
+    }
+    .required-indicator {color:#b65a40; margin-left:2px;}
+    .success-message {display:none; margin:0; font-size:.85rem; background:#e6f6ec; color:#145a2e; padding:.6rem .8rem; border-radius:8px; border:1px solid #c1e9d0;}
+    .error-message {display:none; margin:0; font-size:.8rem; background:#fdebea; color:#8a1f14; padding:.6rem .8rem; border-radius:8px; border:1px solid #f6c7c2;}
+</style>
+</head>
+<body>
+<header class="main-header" role="navigation" aria-label="Primary">
+    <div class="header-inner">
+    <div class="header-left">
+        <button class="burger-menu" aria-label="Toggle menu" aria-expanded="false" aria-controls="site-menu">
+        <span class="burger-bar"></span><span class="burger-bar"></span><span class="burger-bar"></span>
+        </button>
+    </div>
+    <div class="header-center">
+        <a href="index.html" class="logo-link" aria-label="Purely Maurly Home">
+        <img src="assets/headerfloer.png" alt="Purely Maurly Logo" class="header-logo">
+        </a>
+    </div>
+    <nav id="site-menu" class="header-nav" aria-hidden="true">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="shop.html">Shop</a>
+        <a class="nav-link" href="locations.html">Locations</a>
+<a class="nav-link" href="contact.html">Contact</a>
+    </nav>
+    <div class="header-right">
+        <button id="accountBtn" class="account-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="authDialog" aria-label="Sign in or create account">
+          <span class="account-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5Z"/><path d="M3.5 22c1.6-4.1 5-6 8.5-6s6.9 1.9 8.5 6"/></svg>
+          </span>
+          <span class="account-label">Login</span>
+        </button>
+        <a href="#cart" class="cart-button" aria-label="View cart">
+          <img src="assets/shopping-cart.png" alt="Cart">
+          <span class="cart-count-badge" data-cart-count style="display:none;">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="mainContent" tabindex="-1">
+    <section class="contact-hero" aria-labelledby="contactHeroTitle">
+      <h1 id="contactHeroTitle">Get in Touch</h1>
+      <p>We'd love to hear from you. Whether you have a question about products, orders, wholesale, or anything else—our team is ready to help.</p>
+    </section>
+
+    <div class="contact-wrapper">
+      <section class="contact-card" aria-labelledby="contactOptionsTitle">
+        <h2 id="contactOptionsTitle">Contact Options</h2>
+        <ul class="contact-methods">
+          <li class="contact-method">
+            <div class="contact-method-icon" aria-hidden="true">📧</div>
+            <div>
+              <strong>Email Support</strong>
+              <span><a href="mailto:support@purelymaurly.com">support@purelymaurly.com</a><br>Typical reply: within 24 hours</span>
+            </div>
+          </li>
+          <li class="contact-method">
+            <div class="contact-method-icon" aria-hidden="true">🛍️</div>
+            <div>
+              <strong>Order Questions</strong>
+              <span><a href="mailto:orders@purelymaurly.com">orders@purelymaurly.com</a><br>Shipping, tracking & returns</span>
+            </div>
+          </li>
+          <li class="contact-method">
+            <div class="contact-method-icon" aria-hidden="true">🤝</div>
+            <div>
+              <strong>Wholesale</strong>
+              <span><a href="mailto:wholesale@purelymaurly.com">wholesale@purelymaurly.com</a><br>Partnership & bulk inquiries</span>
+            </div>
+          </li>
+          <li class="contact-method">
+            <div class="contact-method-icon" aria-hidden="true">📍</div>
+            <div>
+              <strong>Visit Us</strong>
+              <span>See our <a href="locations.html">locations page</a> for in‑store hours</span>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="contact-form-card" aria-labelledby="contactFormTitle">
+        <h2 id="contactFormTitle">Send a Message</h2>
+        <p class="success-message" id="contactSuccess" role="alert">Thank you! Your message was sent.</p>
+        <p class="error-message" id="contactError" role="alert">Something went wrong. Please try again.</p>
+        <form id="contactForm" novalidate>
+          <div class="inline-two">
+            <div class="field">
+              <label for="cfName">Name<span class="required-indicator" aria-hidden="true">*</span></label>
+              <input id="cfName" name="name" type="text" required minlength="2" autocomplete="name" />
+            </div>
+            <div class="field">
+              <label for="cfEmail">Email<span class="required-indicator" aria-hidden="true">*</span></label>
+              <input id="cfEmail" name="email" type="email" required autocomplete="email" />
+            </div>
+          </div>
+          <div class="inline-two">
+            <div class="field">
+              <label for="cfTopic">Topic<span class="required-indicator" aria-hidden="true">*</span></label>
+              <select id="cfTopic" name="topic" required>
+                <option value="" disabled selected>Select one</option>
+                <option>Product Question</option>
+                <option>Order / Shipping</option>
+                <option>Wholesale</option>
+                <option>Website Feedback</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cfOrder">Order # (optional)</label>
+              <input id="cfOrder" name="order" type="text" inputmode="numeric" pattern="[0-9A-Za-z-]{3,}" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="cfMessage">Message<span class="required-indicator" aria-hidden="true">*</span></label>
+            <textarea id="cfMessage" name="message" required minlength="10" maxlength="1500" placeholder="How can we help? Provide as many details as possible."></textarea>
+          </div>
+          <div class="submit-row">
+            <button type="submit" class="btn-primary">Send Message</button>
+            <span class="form-note">We'll never share your email. Required fields marked with an asterisk (*).</span>
+          </div>
+        </form>
+      </section>
+
+      <section class="map-card" aria-labelledby="mapTitle">
+        <h2 id="mapTitle" class="visually-hidden">Location Map</h2>
+        <iframe class="map-frame" title="Store locations map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.019937781443!2d-122.40135082345048!3d37.79084171139539!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80858064d1f5d8dd%3A0x8d1a6e7e6b6f!2sSample%20Shop!5e0!3m2!1sen!2sus!4v0000000000000"></iframe>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Reuse burger logic similar to index without duplication risk
+    (function(){
+      const burger=document.querySelector('.burger-menu');
+      const menu=document.getElementById('site-menu');
+      if(!burger||!menu) return;
+      function setOpen(o){
+        burger.classList.toggle('open',o); menu.classList.toggle('open',o);
+        burger.setAttribute('aria-expanded',o); menu.setAttribute('aria-hidden',!o);
+      }
+      burger.addEventListener('click',e=>{e.stopPropagation(); setOpen(!burger.classList.contains('open'));});
+      document.addEventListener('click',e=>{ if(!menu.contains(e.target)&&!burger.contains(e.target)) setOpen(false); });
+      document.addEventListener('keydown',e=>{ if(e.key==='Escape') setOpen(false); });
+      menu.querySelectorAll('a.nav-link').forEach(a=>a.addEventListener('click',()=>setOpen(false)));
+    })();
+
+    // Contact form progressive enhancement (client-side only baseline)
+    (function(){
+      const form=document.getElementById('contactForm');
+      if(!form) return;
+      const successMsg=document.getElementById('contactSuccess');
+      const errorMsg=document.getElementById('contactError');
+
+      function show(el){el.style.display='block';}
+      function hide(el){el.style.display='none';}
+
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault(); hide(successMsg); hide(errorMsg);
+        if(!form.checkValidity()){ form.reportValidity(); return; }
+        const fd=new FormData(form);
+        const payload=Object.fromEntries(fd.entries());
+        try {
+          // If backend endpoint exists, adjust URL accordingly
+          const res=await fetch('/api/contact',{
+            method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+          });
+          if(res.ok){ form.reset(); show(successMsg);} else { show(errorMsg);}        
+        } catch(err){ show(errorMsg); }
+      });
+    })();
+  </script>
+  <script>
+    // Active nav highlighting
+    (function(){
+      const current=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+      document.querySelectorAll('#site-menu a.nav-link').forEach(a=>{
+        const href=(a.getAttribute('href')||'').toLowerCase();
+        if(href===current){
+          a.classList.add('active');
+          a.setAttribute('aria-current','page');
+        } else {
+          a.classList.remove('active');
+          a.removeAttribute('aria-current');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

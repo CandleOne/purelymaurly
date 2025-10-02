@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop • Purely Maurly Wellness</title>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="description" content="Shop handmade soaps, lotions, candles, and accessories from Purely Maurly Wellness." />
+</head>
+<body>
+    <!-- Refactored Top Bar (no overlap, fully responsive) -->
+    <div class="top-bar" role="banner">
+        <div class="top-bar-inner">
+            <div class="top-bar-section top-left">
+                <img src="assets/location.png" alt="Locations" class="top-icon" width="28" height="28">
+                <a href="locations.html" class="top-link">Find our locations</a>
+            </div>
+            <div class="top-bar-section top-center" aria-live="polite">
+                <span id="topBarMessage" class="top-message">Free shipping on orders over $50!</span>
+                <a href="/shop.html" id="topBarCta" class="top-cta">Shop Now</a>
+            </div>
+            <div class="top-bar-section top-right">
+                <button id="ecoFriendlyBtn" class="eco-btn" aria-label="Eco friendly mission">
+                    <img src="assets/ecofriendly.png" alt="Eco Friendly" class="top-icon" width="30" height="30">
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function(){
+        const messages = [
+            'Free shipping on orders over $50!',
+            'Sign up for exclusive offers!',
+            'New arrivals every week!',
+            'Join our community for wellness tips!'
+        ];
+        const showCta = [true, true, true, true];
+        const msgEl = document.getElementById('topBarMessage');
+        const ctaEl = document.getElementById('topBarCta');
+        let idx = 0;
+        function rotate(){
+            msgEl.classList.add('fade-out');
+            ctaEl.classList.add('fade-out');
+            setTimeout(()=>{
+                idx = (idx + 1) % messages.length;
+                msgEl.textContent = messages[idx];
+                ctaEl.style.visibility = showCta[idx] ? 'visible' : 'hidden';
+                msgEl.classList.remove('fade-out');
+                ctaEl.classList.remove('fade-out');
+            },350);
+        }
+        setInterval(rotate, 3500);
+    })();
+    </script>
+    <!-- Cart Drawer -->
+    <div id="cartOverlay" class="cart-overlay" aria-hidden="true"></div>
+    <aside id="cartDrawer" class="cart-drawer" aria-hidden="true" aria-label="Shopping cart">
+        <div class="cart-drawer-header">
+            <h3>Your Cart <span id="cartCount" class="cart-badge" style="display:none;">0</span></h3>
+            <button id="closeCart" class="cart-close" aria-label="Close cart">×</button>
+        </div>
+        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-footer">
+            <div class="cart-sub">
+                <span>Subtotal</span><strong id="cartSubtotal">$0.00</strong>
+            </div>
+            <button class="checkout-btn" disabled>Checkout</button>
+            <p class="cart-note">Taxes and shipping calculated at checkout.</p>
+        </div>
+    </aside>
+    <script src="cart.js"></script>
+    <!-- Only dynamic content below will be replaced -->
+
+    <header class="main-header" role="navigation" aria-label="Primary">
+        <div class="header-inner">
+            <div class="header-left">
+                <button class="burger-menu" aria-label="Toggle menu" aria-expanded="false" aria-controls="site-menu">
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
+                </button>
+            </div>
+            <div class="header-center">
+                <a href="index.html" class="logo-link" aria-label="Purely Maurly Home">
+                    <img src="assets/headerfloer.png" alt="Purely Maurly Logo" class="header-logo">
+                </a>
+            </div>
+            <nav id="site-menu" class="header-nav" aria-hidden="true">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="shop.html">Shop</a>
+                <a class="nav-link" href="locations.html">Locations</a>
+                <a class="nav-link" href="/contact.html">Contact</a>
+            </nav>
+            <div class="header-right">
+                    <button id="accountBtn" class="account-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="authDialog" aria-label="Sign in or create account">
+                        <span class="account-icon" aria-hidden="true">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5Z"/>
+                                <path d="M3.5 22c1.6-4.1 5-6 8.5-6s6.9 1.9 8.5 6"/>
+                            </svg>
+                        </span>
+                        <span class="account-label">Login</span>
+                    </button>
+                <a href="#cart" class="cart-button" aria-label="View cart">
+                    <img src="assets/shopping-cart.png" alt="Cart">
+                    <span class="cart-count-badge" data-cart-count style="display:none;">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+    <!-- Removed duplicate early burger script; consolidated at bottom -->
+    <!-- Shop Content -->
+    <main class="shop-page">
+        <h1 class="shop-title">Shop</h1>
+        <p class="shop-subtitle">Handmade wellness goods crafted with care.</p>
+
+        <section class="shop-grid">
+                        <article class="product-card">
+                <img src="assets/pexels-karolina-grabowska-4219654.jpg" alt="Lavender Soap" />
+                <div class="product-info">
+                    <h3 class="product-title">Test listing</h3>
+                    <p class="product-desc">Test transactions with me</p>
+                    <div class="product-meta">
+                        <span class="price">$1.00</span>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 1 -->
+            <article class="product-card">
+                <img src="assets/pexels-karolina-grabowska-4219654.jpg" alt="Lavender Soap" />
+                <div class="product-info">
+                    <h3 class="product-title">Lavender Soap</h3>
+                    <p class="product-desc">Calming floral scent, gentle on skin.</p>
+                    <div class="product-meta">
+                        <span class="price">$8.99</span>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 2 -->
+            <article class="product-card">
+                <img src="assets/pexels-cristian-rojas-10040005.jpg" alt="Vanilla Candle" />
+                <div class="product-info">
+                    <h3 class="product-title">Vanilla Candle</h3>
+                    <p class="product-desc">Warm, cozy aroma for any room.</p>
+                    <div class="product-meta">
+                        <span class="price">$14.50</span>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 3 -->
+            <article class="product-card">
+                <img src="assets/pexels-karolina-grabowska-4219654.jpg" alt="Glow Face Serum" />
+                <div class="product-info">
+                    <h3 class="product-title">Glow Face Serum</h3>
+                    <p class="product-desc">Vitamin-rich, lightweight hydration.</p>
+                    <div class="product-meta">
+                        <span class="price">$22.00</span>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 4 -->
+            <article class="product-card">
+                <img src="assets/pexels-cristian-rojas-10040005.jpg" alt="Organic Body Lotion" />
+                <div class="product-info">
+                    <h3 class="product-title">Organic Body Lotion</h3>
+                    <p class="product-desc">Silky smooth moisture, naturally made.</p>
+                    <div class="product-meta">
+                        <span class="price">$18.75</span>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 5 -->
+            <article class="product-card">
+                <img src="assets/pexels-karolina-grabowska-4219654.jpg" alt="Herbal Shampoo" />
+                <div class="product-info">
+                    <h3 class="product-title">Herbal Shampoo</h3>
+                    <p class="product-desc">Gentle cleanse with botanical extracts.</p>
+                    <div class="product-meta">
+                        <span class="price">$12.25</span>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 6 -->
+            <article class="product-card">
+                <img src="assets/pexels-cristian-rojas-10040005.jpg" alt="Essential Oil Blend" />
+                <div class="product-info">
+                    <h3 class="product-title">Essential Oil Blend</h3>
+                    <p class="product-desc">Uplifting citrus and herb notes.</p>
+                    <div class="product-meta">
+                        <span class="price">$16.00</span>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 7 -->
+            <article class="product-card">
+                <img src="assets/pexels-karolina-grabowska-4219654.jpg" alt="Cocoa Lip Balm" />
+                <div class="product-info">
+                    <h3 class="product-title">Cocoa Lip Balm</h3>
+                    <p class="product-desc">Nourishing, smooth, and protective.</p>
+                    <div class="product-meta">
+                        <span class="price">$5.50</span>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Product 8 -->
+            <article class="product-card">
+                <img src="assets/pexels-cristian-rojas-10040005.jpg" alt="Handmade Tote" />
+                <div class="product-info">
+                    <h3 class="product-title">Handmade Tote</h3>
+                    <p class="product-desc">Durable canvas for daily errands.</p>
+                    <div class="product-meta">
+                        <span class="price">$24.00</span>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </article>
+        </section>
+        
+        <!-- Wholesale CTA -->
+        <section class="wholesale-cta" id="wholesale">
+            <div class="wholesale-cta-inner">
+                <h2>Wholesale? Get in touch!</h2>
+                <p>We offer bulk pricing for retail partners, events, and custom orders.</p>
+                <a class="wholesale-btn" href="/contact.html">Contact us</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Cart Drawer -->
+    <div id="cartOverlay" class="cart-overlay" aria-hidden="true"></div>
+    <aside id="cartDrawer" class="cart-drawer" aria-hidden="true" aria-label="Shopping cart">
+        <div class="cart-drawer-header">
+            <h3>Your Cart <span id="cartCount" class="cart-badge" style="display:none;">0</span></h3>
+            <button id="closeCart" class="cart-close" aria-label="Close cart">×</button>
+        </div>
+        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-footer">
+            <div class="cart-sub">
+                <span>Subtotal</span><strong id="cartSubtotal">$0.00</strong>
+            </div>
+            <button class="checkout-btn" disabled>Checkout</button>
+            <p class="cart-note">Taxes and shipping calculated at checkout.</p>
+        </div>
+    </aside>
+
+        <!-- Unified burger toggle / dropdown -->
+        <script>
+        (function(){
+            const burger = document.querySelector('.burger-menu');
+            const menu = document.getElementById('site-menu');
+            if(!burger || !menu){ console.warn('[shop] burger elements missing'); return; }
+
+            // Initial state
+            menu.classList.remove('open');
+            menu.setAttribute('aria-hidden','true');
+            burger.setAttribute('aria-expanded','false');
+
+            function lockScroll(on){
+                if(on){ document.documentElement.style.overflow='hidden'; }
+                else { document.documentElement.style.overflow=''; }
+            }
+            function setOpen(open){
+                burger.classList.toggle('open', open);
+                menu.classList.toggle('open', open);
+                burger.setAttribute('aria-expanded', String(open));
+                menu.setAttribute('aria-hidden', String(!open));
+                // mobile scroll lock only when narrow
+                if(window.innerWidth < 880) lockScroll(open); else lockScroll(false);
+            }
+            burger.addEventListener('click', e=>{ e.stopPropagation(); setOpen(!burger.classList.contains('open')); });
+            document.addEventListener('click', e=>{ if(!menu.contains(e.target) && !burger.contains(e.target)) setOpen(false); });
+            document.addEventListener('keydown', e=>{ if(e.key==='Escape') setOpen(false); });
+            menu.querySelectorAll('a.nav-link').forEach(a=> a.addEventListener('click', ()=> setOpen(false)));
+            // Resize: if moving to desktop ensure scroll unlocked
+            window.addEventListener('resize', ()=>{ if(window.innerWidth>=880) lockScroll(false); });
+        })();
+        </script>
+    <script src="cart.js"></script>
+    <!-- Auth Modal (replicated from index.html for login/signup access) -->
+    <div id="authOverlay" class="auth-overlay" aria-hidden="true"></div>
+    <div id="authDialog" class="auth-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="authDialogTitle">
+        <div class="auth-modal-inner">
+            <button class="auth-close" id="authClose" aria-label="Close dialog">×</button>
+            <div class="auth-tabs" role="tablist">
+                <button class="auth-tab active" role="tab" aria-selected="true" id="loginTab" data-target="loginPanel">Login</button>
+                <button class="auth-tab" role="tab" aria-selected="false" id="signupTab" data-target="signupPanel">Sign Up</button>
+            </div>
+            <div class="auth-panels">
+                <section id="loginPanel" class="auth-panel active" role="tabpanel" aria-labelledby="loginTab">
+                    <h2 id="authDialogTitle" class="auth-title">Welcome Back</h2>
+                    <form id="loginForm" class="auth-form" novalidate>
+                        <label class="auth-field">Email
+                            <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+                        </label>
+                        <label class="auth-field">Password
+                            <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+                        </label>
+                        <button type="submit" class="auth-submit">Login</button>
+                        <p class="auth-switch">No account? <button type="button" class="inline-switch" data-switch="signup">Sign up</button></p>
+                    </form>
+                </section>
+                <section id="signupPanel" class="auth-panel" role="tabpanel" aria-labelledby="signupTab" hidden>
+                    <h2 class="auth-title">Create Account</h2>
+                    <form id="signupForm" class="auth-form" novalidate>
+                        <label class="auth-field">Name
+                            <input type="text" name="name" required minlength="2" placeholder="Your name">
+                        </label>
+                        <label class="auth-field">Email
+                            <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+                        </label>
+                        <label class="auth-field">Password
+                            <input type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Min 6 characters">
+                        </label>
+                        <label class="auth-field">Confirm Password
+                            <input type="password" name="confirm" required minlength="6" autocomplete="new-password" placeholder="Repeat password">
+                        </label>
+                        <button type="submit" class="auth-submit">Sign Up</button>
+                        <p class="auth-switch">Already have an account? <button type="button" class="inline-switch" data-switch="login">Login</button></p>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="auth.js"></script>
+</body>
+</html>

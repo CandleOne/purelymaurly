@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Order Confirmation • Purely Maurly</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f6f8;margin:0;color:#111;}
+header{position:fixed;top:0;left:0;right:0;background:#fff/90;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid #e5e7eb;}
+.header-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:14px 24px;font-weight:600;font-size:.85rem;}
+main{max-width:960px;margin:120px auto 80px;padding:0 22px;display:grid;gap:38px;grid-template-columns:1fr 320px;align-items:start;}
+@media (max-width:900px){main{grid-template-columns:1fr;margin-top:100px;}}
+.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:26px;padding:28px 30px 34px;box-shadow:0 20px 60px -25px rgba(0,0,0,.25);} 
+.h1{margin:0 0 6px;font-size:1.8rem;letter-spacing:.02em;}
+.lead{margin:0 0 22px;font-size:.95rem;line-height:1.55;color:#374151;}
+.items{display:flex;flex-direction:column;gap:18px;margin:12px 0 4px;}
+.item{display:flex;justify-content:space-between;align-items:flex-start;font-size:.75rem;gap:12px;padding-bottom:8px;border-bottom:1px dashed #e5e7eb;}
+.item:last-child{border-bottom:0;padding-bottom:0;}
+.badge{background:#111;color:#fff;font-size:.55rem;padding:4px 8px;border-radius:999px;letter-spacing:.05em;font-weight:600;}
+.summary-rows{margin-top:14px;font-size:.75rem;}
+.sum-row{display:flex;justify-content:space-between;margin:4px 0;}
+.sum-row.total{font-weight:700;font-size:.9rem;padding-top:6px;border-top:1px solid #e5e7eb;margin-top:8px;}
+.code-pill{display:inline-block;background:#1f2937;color:#fff;font-size:.6rem;padding:4px 10px;border-radius:999px;letter-spacing:.05em;margin-left:8px;}
+.status{font-size:.6rem;font-weight:700;letter-spacing:.05em;padding:6px 10px;border-radius:12px;display:inline-block;background:#10b981;color:#fff;margin-top:2px;}
+.meta{font-size:.6rem;color:#555;margin-top:12px;line-height:1.4;}
+.skeleton{background:linear-gradient(90deg,#f1f5f9,#e2e8f0,#f1f5f9);background-size:200% 100%;animation:sh 1.4s ease-in-out infinite;height:14px;border-radius:6px;margin:6px 0;}
+@keyframes sh{0%{background-position:0 0}100%{background-position:200% 0}}
+.btn{display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 22px;border-radius:16px;font-weight:600;font-size:.75rem;letter-spacing:.06em;margin-top:16px;}
+.alert{font-size:.7rem;font-weight:600;margin-top:12px;}
+.alert.err{color:#b3261e;}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <img src="assets/headerfloer.png" alt="Logo" style="height:40px;"> Order Confirmation
+  </div>
+</header>
+<main>
+  <div class="card" id="left">
+    <h1 class="h1">Thank you!</h1>
+    <p class="lead">Your order has been received and is now being prepared. A confirmation email will arrive shortly. Below are the details for your records.</p>
+    <div id="items" class="items"></div>
+    <div id="orderSummary" class="summary-rows"></div>
+  <div id="meta" class="meta"></div>
+  <div id="autoRedirect" class="meta" style="display:none;color:#1f2937;font-weight:600;"></div>
+    <div id="error" class="alert err" style="display:none"></div>
+    <a href="shop.html" class="btn">Continue Shopping</a>
+  </div>
+  <div class="card" id="right">
+    <h2 style="margin:0 0 6px;font-size:1rem;">Payment</h2>
+    <div id="paymentBox" style="font-size:.75rem;line-height:1.5;">
+      <div class="skeleton" style="width:70%;"></div>
+      <div class="skeleton" style="width:55%;"></div>
+      <div class="skeleton" style="width:80%;"></div>
+    </div>
+  </div>
+</main>
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  // Support both sid (legacy) and session_id (Stripe default placeholder)
+  const sid = qs.get('sid') || qs.get('session_id');
+  const itemsEl = document.getElementById('items');
+  const orderSum = document.getElementById('orderSummary');
+  const metaEl = document.getElementById('meta');
+  const payBox = document.getElementById('paymentBox');
+  const errEl = document.getElementById('error');
+  if(!sid){errEl.textContent='Missing session id';errEl.style.display='block';return;}
+  function fmtCents(c){return '$'+(c/100).toFixed(2);}  
+  fetch('/api/checkout/session/'+encodeURIComponent(sid))
+    .then(r=>r.json().catch(()=>({})).then(d=>({ok:r.ok && d.ok,data:d})))
+    .then(res=>{
+      if(!res.ok){throw new Error((res.data && res.data.error)||'Could not load session');}
+      const d = res.data;
+      payBox.innerHTML = '<div class="status">'+(d.status||'unknown').replace(/_/g,' ').toUpperCase()+'</div>'+
+        '<div style="margin-top:10px">Total Paid: <strong>'+fmtCents(d.amount_total)+'</strong> '+(d.currency||'').toUpperCase()+'</div>';
+      if(d.items && d.items.length){
+        itemsEl.innerHTML='';
+        d.items.forEach(it=>{
+          const div=document.createElement('div');div.className='item';
+          div.innerHTML='<div style="flex:1;">'+(it.description||'Item')+'<div style="color:#555;margin-top:4px;font-size:.65rem;">Qty '+(it.quantity||1)+'</div></div>'+
+            '<div style="font-weight:600;">'+fmtCents(it.amount_subtotal)+'</div>';
+          itemsEl.appendChild(div);
+        });
+      } else {
+        itemsEl.innerHTML='<p style="font-size:.7rem;color:#555;">Line item details unavailable.</p>';
+      }
+      // Summary
+      orderSum.innerHTML='<div class="sum-row total"><span>Grand Total</span><span>'+fmtCents(d.amount_total)+'</span></div>';
+      // Metadata info
+      const md = d.metadata || {}; let metaBits=[];
+      if(md.coupon_code){metaBits.push('Coupon <span class="code-pill">'+md.coupon_code+'</span>');}
+      if(md.coupon_type && md.coupon_value){metaBits.push('Discount: '+md.coupon_type+' '+md.coupon_value);}
+      if(md.coupon_discount_cents){metaBits.push('Discount Applied: '+fmtCents(parseInt(md.coupon_discount_cents||'0')));}
+      if(md.user_uuid){metaBits.push('User Ref: '+md.user_uuid);} 
+  if(metaBits.length){metaEl.innerHTML=metaBits.join('<br>');}
+  // Clear cart (client side) as order completed
+  try{localStorage.removeItem('pm_cart');}catch{}
+  // Auto redirect back to checkout after short delay so checkout can refresh state
+  const ar = document.getElementById('autoRedirect');
+  let secs = 7; ar.style.display='block';
+  function tick(){ar.innerHTML='Returning to checkout in '+secs+'s… <a href="checkout.html" style="text-decoration:none;color:#2563eb;">Go now</a> <span style="margin-left:8px;cursor:pointer;color:#b45309;" id="cancelAR">Cancel</span>';}
+  tick();
+  const timer = setInterval(()=>{secs--;if(secs<=0){clearInterval(timer);location.href='checkout.html?ref=confirm';}else{tick();}},1000);
+  document.addEventListener('click',e=>{if(e.target && e.target.id==='cancelAR'){clearInterval(timer);ar.textContent='Auto return canceled.';}});
+    })
+    .catch(err=>{errEl.textContent=err.message;errEl.style.display='block';payBox.innerHTML='<span style="color:#b3261e;font-weight:600;font-size:.7rem;">Failed to load payment details</span>';});
+})();
+</script>
+</body>
+</html>
